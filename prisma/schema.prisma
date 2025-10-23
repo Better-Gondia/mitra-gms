@@ -1,0 +1,283 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// -------------------------
+/// ENUMS
+/// -------------------------
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
+  COLLECTOR_TEAM
+  DEPARTMENT_TEAM
+  SUPERINTENDENT_OF_POLICE
+  MP_RAJYA_SABHA
+}
+
+enum AuthType {
+  DETAILS
+  GOOGLE
+}
+
+enum ComplaintStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  BACKLOG
+  NEED_DETAILS
+  INVALID
+}
+
+enum Priority {
+  NORMAL
+  HIGH
+}
+
+enum Department {
+  PUBLIC_WORKS
+  WATER_SUPPLY
+  SANITATION
+  HEALTH
+  URBAN_PLANNING
+  POLICE
+}
+
+enum Language {
+  HINDI
+  ENGLISH
+  MARATHI
+}
+
+enum ComplaintType {
+  COMPLAINT
+  SUGGESTION
+}
+
+enum InteractionType {
+  CO_SIGN
+  REPORT
+}
+
+enum ReportReason {
+  INAPPROPRIATE_CONTENT
+  MISLEADING_OR_FALSE_INFO
+  SPAM_OR_DUPLICATE
+  PRIVACY_VIOLATION
+  HARASSMENT_OR_HATE_SPEECH
+  OTHER
+}
+
+enum BugStatus {
+  OPEN
+  RESOLVED
+  IGNORED
+}
+
+enum ComplaintPhase {
+  INIT
+  LANGUAGE
+  COMPLAINT_TYPE
+  TALUKA
+  DESCRIPTION
+  ATTACHMENT
+  LOCATION
+  COMPLETED
+}
+
+/// -------------------------
+/// CORE ENTITIES
+/// -------------------------
+
+model User {
+  id       Int      @id @default(autoincrement())
+  name     String
+  age      Int?
+  gender   Gender?
+  role     Role     @default(USER)
+  /// TODO: TO-ASK - Align backend `Role` enum with frontend `UserRole` values
+  /// Frontend has roles like "District Collector", "Collector Team", multiple MLAs/MPs.
+  /// Consider: a separate `StakeholderRole` enum or expanding `Role` to include these.
+  slug     String   @unique
+  mobile   String?  @unique
+  email    String?  @unique
+  password String? // Added for NextAuth
+  address  String?
+  authType AuthType @default(DETAILS)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  complaints   Complaint[]
+  interactions Interaction[]
+  bugs         Bug[]
+  history      ComplaintHistory[]
+
+  // NextAuth relations
+  accounts Account[]
+  sessions Session[]
+
+  @@index([mobile])
+  @@index([email])
+  @@index([role])
+}
+
+model Complaint {
+  id          Int             @id @default(autoincrement())
+  /// TODO: Consider adding stable human-facing externalId (e.g., GC-123)
+  /// externalId String @unique // to avoid coupling UI to numeric IDs
+  userId      Int
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String?
+  description String?
+  status      ComplaintStatus @default(OPEN)
+  priority    Priority        @default(NORMAL)
+  department  Department?
+  category    String?
+  subcategory String?
+  taluka      String?
+  location    String?
+  latitude    Decimal?
+  longitude   Decimal?
+
+  language Language       @default(ENGLISH)
+  type     ComplaintType?
+  phase    ComplaintPhase
+
+  media Json[] @default([])
+  /// TODO: TO-ASK - Do we need structured media with type/url/approvedBy instead of raw Json[]?
+
+  isMediaApproved    Boolean  @default(false)
+  isPublic           Boolean  @default(false)
+  coSignCount        Int      @default(0)
+  reportCount        Int      @default(0)
+  linkedComplaintIds String[] @default([])
+  createdAt          DateTime @default(now()) // maps to UI submittedDate
+  updatedAt          DateTime @updatedAt // maps to UI lastUpdated
+
+  history       ComplaintHistory[]
+  interactions  Interaction[]
+  statusUpdates StatusUpdate[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([department])
+  @@index([priority])
+  @@index([category, subcategory])
+}
+
+model ComplaintHistory {
+  id          Int       @id @default(autoincrement())
+  complaintId Int
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        Role
+  action      String
+  notes       String?
+  attachment  String?
+  eta         DateTime?
+  createdAt   DateTime  @default(now())
+  /// TODO: Add optional fields to match UI capabilities:
+  /// visibility  String?   // 'public' | 'internal'
+  /// taggedUsers String[]? // store tagged role slugs or user IDs
+  /// department  Department?
+  /// priority    Priority?
+
+  @@index([complaintId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Interaction {
+  id           String          @id @default(uuid())
+  type         InteractionType
+  reportReason ReportReason?
+  text         String?
+  userId       Int
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  complaintId  Int
+  complaint    Complaint       @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  createdAt    DateTime        @default(now())
+
+  @@unique([userId, complaintId, type])
+}
+
+model Bug {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String
+  reporterId  Int
+  reporter    User      @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  status      BugStatus @default(OPEN)
+  priority    Priority  @default(NORMAL)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model StatusUpdate {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String?
+  imageUrl    String?
+  videoUrl    String?
+  complaintId Int?
+  complaint   Complaint? @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  isActive    Boolean    @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([complaintId])
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+// NextAuth.js models
+model Account {
+  id                String  @id @default(cuid())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
