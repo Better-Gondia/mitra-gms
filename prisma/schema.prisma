@@ -92,9 +92,13 @@ enum ComplaintPhase {
   LANGUAGE
   COMPLAINT_TYPE
   TALUKA
+  SUGGESTION_DESCRIPTION
+
   DESCRIPTION
   ATTACHMENT
   LOCATION
+
+  CONFIRMATION
   COMPLETED
 }
 
@@ -108,13 +112,9 @@ model User {
   age      Int?
   gender   Gender?
   role     Role     @default(USER)
-  /// TODO: TO-ASK - Align backend `Role` enum with frontend `UserRole` values
-  /// Frontend has roles like "District Collector", "Collector Team", multiple MLAs/MPs.
-  /// Consider: a separate `StakeholderRole` enum or expanding `Role` to include these.
   slug     String   @unique
-  mobile   String?  @unique
+  mobile   String   @unique
   email    String?  @unique
-  password String? // Added for NextAuth
   address  String?
   authType AuthType @default(DETAILS)
 
@@ -126,10 +126,6 @@ model User {
   bugs         Bug[]
   history      ComplaintHistory[]
 
-  // NextAuth relations
-  accounts Account[]
-  sessions Session[]
-
   @@index([mobile])
   @@index([email])
   @@index([role])
@@ -137,8 +133,6 @@ model User {
 
 model Complaint {
   id          Int             @id @default(autoincrement())
-  /// TODO: Consider adding stable human-facing externalId (e.g., GC-123)
-  /// externalId String @unique // to avoid coupling UI to numeric IDs
   userId      Int
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   title       String?
@@ -158,15 +152,14 @@ model Complaint {
   phase    ComplaintPhase
 
   media Json[] @default([])
-  /// TODO: TO-ASK - Do we need structured media with type/url/approvedBy instead of raw Json[]?
 
   isMediaApproved    Boolean  @default(false)
   isPublic           Boolean  @default(false)
   coSignCount        Int      @default(0)
   reportCount        Int      @default(0)
   linkedComplaintIds String[] @default([])
-  createdAt          DateTime @default(now()) // maps to UI submittedDate
-  updatedAt          DateTime @updatedAt // maps to UI lastUpdated
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   history       ComplaintHistory[]
   interactions  Interaction[]
@@ -191,11 +184,6 @@ model ComplaintHistory {
   attachment  String?
   eta         DateTime?
   createdAt   DateTime  @default(now())
-  /// TODO: Add optional fields to match UI capabilities:
-  /// visibility  String?   // 'public' | 'internal'
-  /// taggedUsers String[]? // store tagged role slugs or user IDs
-  /// department  Department?
-  /// priority    Priority?
 
   @@index([complaintId])
   @@index([userId])
@@ -224,8 +212,17 @@ model Bug {
   reporter    User      @relation(fields: [reporterId], references: [id], onDelete: Cascade)
   status      BugStatus @default(OPEN)
   priority    Priority  @default(NORMAL)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+
+  // Enhanced fields for feedback/bug reports
+  type       String  @default("bug") // "bug" or "feedback"
+  rating     Int? // For feedback (1-5 stars)
+  screenshot String? // Base64 encoded screenshot
+  userAgent  String? // Browser info
+  url        String? // Page URL where issue occurred
+  steps      String? // Steps to reproduce (for bugs)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model StatusUpdate {
@@ -244,40 +241,4 @@ model StatusUpdate {
   @@index([complaintId])
   @@index([isActive])
   @@index([createdAt])
-}
-
-// NextAuth.js models
-model Account {
-  id                String  @id @default(cuid())
-  userId            Int
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       Int
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
 }
