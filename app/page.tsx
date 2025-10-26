@@ -44,7 +44,6 @@ type ComplaintUpdateData = {
 };
 
 function DashboardContent() {
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
   const {
     role,
     activeView,
@@ -64,15 +63,7 @@ function DashboardContent() {
     string | null
   >(null);
 
-  const queryClient = useQueryClient();
-
   useEffect(() => {
-    // Initial welcome notification
-    // addNotification({
-    //   message:
-    //     "Welcome to Better Gondia Mitra! You can start by reviewing open complaints.",
-    // });
-
     // Handle deep linking from URL on initial load
     const params = new URLSearchParams(window.location.search);
     const complaintIdFromUrl = params.get("complaint_id");
@@ -89,10 +80,7 @@ function DashboardContent() {
         nextURL.pathname + nextURL.search
       );
     }
-  }, [
-    // addNotification,
-    setSelectedComplaintId,
-  ]);
+  }, [setSelectedComplaintId]);
 
   useEffect(() => {
     // When the context deep link ID changes (from notification click),
@@ -102,201 +90,16 @@ function DashboardContent() {
     }
   }, [deepLinkedComplaintId]);
 
-  // const createHistoryEntry = (
-  //   complaint: Complaint,
-  //   action: string,
-  //   role: UserRole,
-  //   details: Partial<ComplaintUpdateData>
-  // ): ComplaintHistoryEntry => {
-  //   const now = new Date();
-
-  //   let departmentForHistory: Department | undefined = undefined;
-  //   // If assigning, the new department is the one for the history record.
-  //   if (details.newStatus === "Assign" && details.assignDept) {
-  //     departmentForHistory = details.assignDept;
-  //   }
-  //   // If a department team member acts, it's their department.
-  //   else if (role === "Department Team") {
-  //     // Use the complaint's current department since it's their action
-  //     departmentForHistory = complaint.department;
-  //   }
-
-  //   let attachmentUrl: string | undefined = undefined;
-  //   if (details.attachment) {
-  //     attachmentUrl = URL.createObjectURL(details.attachment);
-  //   }
-
-  //   // Extract @-tags from the remark
-  //   const taggedUsers: UserRole[] = [];
-  //   if (details.remark) {
-  //     const matches = details.remark.match(/@([\w\s-]+)/g) || [];
-  //     matches.forEach((match) => {
-  //       const tagName = match.substring(1);
-  //       const taggedRole = userRoles.find(
-  //         (r) => r.toLowerCase() === tagName.toLowerCase()
-  //       );
-  //       if (taggedRole) {
-  //         taggedUsers.push(taggedRole);
-  //       }
-  //     });
-  //   }
-
-  //   return {
-  //     id: `hist-${now.getTime()}`,
-  //     timestamp: now,
-  //     user: role,
-  //     role: role,
-  //     action: action,
-  //     notes: details.remark || undefined,
-  //     department: departmentForHistory,
-  //     // Only record priority in history if it's being set during an assignment
-  //     priority:
-  //       details.newStatus === "Assign" && details.isHighPriority
-  //         ? "High"
-  //         : undefined,
-  //     eta: details.eta,
-  //     attachment: attachmentUrl,
-  //     visibility: details.remarkVisibility || "public",
-  //     taggedUsers: taggedUsers.length > 0 ? taggedUsers : undefined,
-  //   };
-  // };
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: any }) =>
-      apiPatchComplaint(id, payload),
-    onError: () => {
-      toast.error("Failed to save update. Reverting changes.");
-      queryClient.invalidateQueries({ queryKey: ["complaints"] });
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["complaints"] });
-    },
-  });
-
+  // Placeholder functions for ComplaintsView - the actual implementation
+  // will be handled by the ComplaintsView component itself
   const handleUpdateComplaint = (updateData: ComplaintUpdateData) => {
-    const {
-      complaint,
-      newStatus,
-      newTitle,
-      isReopening,
-      assignDept,
-      isHighPriority,
-      newCategory,
-      newSubcategory,
-      remark,
-      remarkVisibility,
-    } = updateData;
-
-    let updatedStatus: ComplaintStatus = complaint.status;
-    let action: string = "Remark added";
-
-    if (newTitle && newTitle !== complaint.title) {
-      action = "Title updated";
-    } else if (newCategory || newSubcategory) {
-      action = "Complaint details updated";
-    } else if (isReopening) {
-      action = "Complaint Reopened";
-      updatedStatus = complaint.status === "Invalid" ? "Open" : "Assigned";
-      // addNotification({
-      //   message: `Complaint ${complaint.id} ("${complaint.title}") has been reopened.`,
-      //   complaintId: complaint.id,
-      // });
-    } else if (newStatus) {
-      if (newStatus === "Assign" && assignDept) {
-        updatedStatus = "Assigned";
-        action = "Complaint Assigned";
-        // addNotification({
-        //   message: `Complaint ${complaint.id} has been assigned to the ${assignDept} department.`,
-        //   complaintId: complaint.id,
-        // });
-      } else {
-        updatedStatus = newStatus as ComplaintStatus;
-        action = `Status changed to ${newStatus}`;
-        // addNotification({
-        //   message: `Status of complaint ${complaint.id} changed to "${newStatus}".`,
-        //   complaintId: complaint.id,
-        // });
-      }
-    } else if (remark) {
-      // addNotification({
-      //   message: `A new remark was added to complaint ${complaint.id}.`,
-      //   complaintId: complaint.id,
-      // });
-    }
-
-    // const historyEntry = createHistoryEntry(
-    //   complaint,
-    //   action,
-    //   role,
-    //   updateData
-    // );
-
-    // Send notifications for tagged users
-    // if (historyEntry.taggedUsers && historyEntry.taggedUsers.length > 0) {
-    //   historyEntry.taggedUsers.forEach((taggedRole) => {
-    //     if (taggedRole !== role) {
-    //       // Don't notify yourself
-    //       const notificationMessage = `${t(
-    //         role.toLowerCase().replace(/ /g, "_")
-    //       )} mentioned you in complaint ${complaint.id}: "${
-    //         historyEntry.notes
-    //       }"`;
-    //       // addNotification({
-    //       //   message: notificationMessage,
-    //       //   targetRole: taggedRole,
-    //       //   complaintId: complaint.id,
-    //       // });
-    //     }
-    //   });
-    //   toast({
-    //     title: "Users Notified",
-    //     description: `Notified ${historyEntry.taggedUsers.join(
-    //       ", "
-    //     )} about your remark.`,
-    //   });
-    // }
-
-    const updatedComplaint: Complaint = {
-      ...complaint,
-      status: updatedStatus,
-      title: newTitle || complaint.title,
-      category: newCategory || complaint.category,
-      subcategory: newSubcategory || complaint.subcategory,
-      department:
-        newStatus === "Assign" && assignDept
-          ? assignDept
-          : complaint.department,
-      priority:
-        newStatus === "Assign" && isHighPriority ? "High" : complaint.priority,
-      // history: [historyEntry, ...complaint.history],
-      // lastUpdated: historyEntry.timestamp,
-    };
-
-    // Optimistic update
-    setComplaints((prev) =>
-      prev.map((c) => (c.id === updatedComplaint.id ? updatedComplaint : c))
-    );
-    // Persist to backend (fire-and-forget)
-    const payload: any = {
-      status: updatedComplaint.status,
-      department: updatedComplaint.department,
-      priority: updatedComplaint.priority,
-      title: updatedComplaint.title,
-      category: updatedComplaint.category,
-      subcategory: updatedComplaint.subcategory,
-      location: updatedComplaint.location,
-      linkedComplaintIds: updatedComplaint.linkedComplaintIds,
-    };
-    updateMutation.mutate({ id: updatedComplaint.id, payload });
+    // This will be handled by ComplaintsView's internal state management
+    console.log("Update complaint:", updateData);
   };
 
   const handleUpdateComplaints = (updatedComplaints: Complaint[]) => {
-    setComplaints((prevComplaints) => {
-      const updatedComplaintMap = new Map(
-        updatedComplaints.map((c) => [c.id, c])
-      );
-      return prevComplaints.map((c) => updatedComplaintMap.get(c.id) || c);
-    });
+    // This will be handled by ComplaintsView's internal state management
+    console.log("Update complaints:", updatedComplaints);
   };
 
   // const handleFindStaleComplaints = async (): Promise<string[]> => {
@@ -435,7 +238,7 @@ function DashboardContent() {
       <div className="flex-1 flex flex-col gap-6">
         {activeView === "list" && (
           <ComplaintsView
-            complaints={complaints}
+            complaints={[]} // Empty array - ComplaintsView will fetch its own data
             onUpdateComplaint={handleUpdateComplaint}
             onUpdateComplaints={handleUpdateComplaints}
             onFindStaleComplaints={async () => {
@@ -453,7 +256,7 @@ function DashboardContent() {
         {activeView === "analytics" && (
           // features.enableRoleAndAnalyticsViews &&
 
-          <AnalyticsDashboard complaints={complaints} />
+          <AnalyticsDashboard complaints={[]} />
         )}
       </div>
     </>

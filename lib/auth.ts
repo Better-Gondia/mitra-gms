@@ -40,6 +40,11 @@ interface Token {
 export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET || "secr3t",
 
+  pages: {
+    signIn: "/auth/signin",
+    error: "/auth/error",
+  },
+
   session: {
     strategy: "jwt",
     maxAge: 365 * 24 * 60 * 60, // 1 year in seconds

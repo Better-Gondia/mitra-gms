@@ -57,6 +57,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/use-language";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiPatchComplaint } from "@/lib/utils";
+import toast from "react-hot-toast";
 import {
   Dialog,
   DialogContent,
@@ -122,7 +125,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
-import toast from "react-hot-toast";
+// import toast from "react-hot-toast";
 import { Toggle } from "./ui/toggle";
 import { differenceInDays } from "date-fns";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
@@ -549,9 +552,9 @@ const EditDetailsDialog: React.FC<{
 };
 
 export default function ComplaintsView({
-  complaints,
-  onUpdateComplaint,
-  onUpdateComplaints,
+  complaints: _complaints, // Renamed to indicate it's not used
+  onUpdateComplaint: _onUpdateComplaint, // Renamed to indicate it's not used
+  onUpdateComplaints: _onUpdateComplaints, // Renamed to indicate it's not used
   onFindStaleComplaints,
   isFindingStale,
   onCalculateAttentionScores,
@@ -796,6 +799,92 @@ export default function ComplaintsView({
     staleFilterIds,
   });
 
+  const queryClient = useQueryClient();
+
+  // Update mutation for individual complaints
+  const updateMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: any }) =>
+      apiPatchComplaint(id, payload),
+    onError: () => {
+      toast.error("Failed to save update. Reverting changes.");
+      queryClient.invalidateQueries({ queryKey: ["complaints"] });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["complaints"] });
+    },
+  });
+
+  // Handle individual complaint updates
+  const handleUpdateComplaint = (updateData: any) => {
+    const {
+      complaint,
+      newStatus,
+      newTitle,
+      isReopening,
+      assignDept,
+      isHighPriority,
+      newCategory,
+      newSubcategory,
+      remark,
+      remarkVisibility,
+    } = updateData;
+
+    let updatedStatus: ComplaintStatus = complaint.status;
+    let action: string = "Remark added";
+
+    if (newTitle && newTitle !== complaint.title) {
+      action = "Title updated";
+    } else if (newCategory || newSubcategory) {
+      action = "Complaint details updated";
+    } else if (isReopening) {
+      action = "Complaint Reopened";
+      updatedStatus = complaint.status === "Invalid" ? "Open" : "Assigned";
+    } else if (newStatus) {
+      if (newStatus === "Assign" && assignDept) {
+        updatedStatus = "Assigned";
+        action = "Complaint Assigned";
+      } else {
+        updatedStatus = newStatus as ComplaintStatus;
+        action = `Status changed to ${newStatus}`;
+      }
+    } else if (remark) {
+      // Handle remark addition
+    }
+
+    const updatedComplaint: Complaint = {
+      ...complaint,
+      status: updatedStatus,
+      title: newTitle || complaint.title,
+      category: newCategory || complaint.category,
+      subcategory: newSubcategory || complaint.subcategory,
+      department:
+        newStatus === "Assign" && assignDept
+          ? assignDept
+          : complaint.department,
+      priority:
+        newStatus === "Assign" && isHighPriority ? "High" : complaint.priority,
+    };
+
+    // Persist to backend
+    const payload: any = {
+      status: updatedComplaint.status,
+      department: updatedComplaint.department,
+      priority: updatedComplaint.priority,
+      title: updatedComplaint.title,
+      category: updatedComplaint.category,
+      subcategory: updatedComplaint.subcategory,
+      location: updatedComplaint.location,
+      linkedComplaintIds: updatedComplaint.linkedComplaintIds,
+    };
+    updateMutation.mutate({ id: updatedComplaint.id, payload });
+  };
+
+  // Handle bulk complaint updates
+  const handleUpdateComplaints = (updatedComplaints: Complaint[]) => {
+    // For bulk updates, we'll invalidate the query to refetch data
+    queryClient.invalidateQueries({ queryKey: ["complaints"] });
+  };
+
   // Show loading toast when fetching more data
   // useEffect(() => {
   //   if (/* isFetching */ true && !isDataLoading) {
@@ -949,7 +1038,7 @@ export default function ComplaintsView({
     if (selectedRows.size === 0) {
       return { commonStatus: null, possibleActions: [] };
     }
-    const selectedComplaints = complaints.filter((c) => selectedRows.has(c.id));
+    const selectedComplaints = paginatedComplaints.filter((c) => selectedRows.has(c.id));
     const firstStatus = selectedComplaints[0].status;
     const allSameStatus = selectedComplaints.every(
       (c) => c.status === firstStatus
@@ -962,7 +1051,7 @@ export default function ComplaintsView({
       };
     }
     return { commonStatus: "mixed", possibleActions: [] };
-  }, [selectedRows, complaints, role]);
+  }, [selectedRows, paginatedComplaints, role]);
 
   const handleOpenBulkActionModal = () => {
     setBulkAction(null);
@@ -1003,7 +1092,7 @@ export default function ComplaintsView({
       return;
     }
 
-    complaints.forEach((c) => {
+    paginatedComplaints.forEach((c) => {
       if (selectedRows.has(c.id)) {
         let actionString = "Bulk remark added";
         let newStatus = c.status;
@@ -1048,7 +1137,7 @@ export default function ComplaintsView({
       }
     });
 
-    onUpdateComplaints(updates);
+    handleUpdateComplaints(updates);
 
     toast.success(`${selectedRows.size} complaints have been updated.`);
 
@@ -1223,10 +1312,10 @@ export default function ComplaintsView({
 
   const complaintToShow = useMemo(() => {
     if (selectedComplaintId) {
-      return complaints.find((c) => c.id === selectedComplaintId) || null;
+      return paginatedComplaints.find((c) => c.id === selectedComplaintId) || null;
     }
     return null;
-  }, [selectedComplaintId, complaints]);
+  }, [selectedComplaintId, paginatedComplaints]);
 
   const closeComplaintDetails = () => {
     setSelectedComplaintId(null);
@@ -1834,11 +1923,11 @@ export default function ComplaintsView({
               ) : (
                 <ComplaintsTable
                   complaints={paginatedComplaints}
-                  allComplaints={complaints}
+                  allComplaints={paginatedComplaints}
                   sortDescriptor={urlSortDescriptor as SortDescriptor}
                   onSortChange={updateSort}
-                  onUpdateComplaint={onUpdateComplaint}
-                  onUpdateComplaints={onUpdateComplaints}
+                  onUpdateComplaint={handleUpdateComplaint}
+                  onUpdateComplaints={handleUpdateComplaints}
                   onViewMedia={setMediaToView}
                   selectedRows={selectedRows}
                   setSelectedRows={setSelectedRows}
@@ -1877,9 +1966,9 @@ export default function ComplaintsView({
           <Card className="h-full w-full flex flex-col rounded-xl shadow-lg">
             <ComplaintDetails
               complaint={complaintToShow}
-              complaints={complaints}
-              onUpdate={onUpdateComplaint}
-              onUpdateComplaints={onUpdateComplaints}
+              complaints={paginatedComplaints}
+              onUpdate={handleUpdateComplaint}
+              onUpdateComplaints={handleUpdateComplaints}
               onViewMedia={setMediaToView}
               onClose={closeComplaintDetails}
               onNavigate={setSelectedComplaintId}
@@ -2087,10 +2176,10 @@ export default function ComplaintsView({
 
       <EditDetailsDialog
         complaint={complaintToEdit}
-        allComplaints={complaints}
+        allComplaints={paginatedComplaints}
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
-        onUpdate={onUpdateComplaint}
+        onUpdate={handleUpdateComplaint}
       />
     </div>
   );

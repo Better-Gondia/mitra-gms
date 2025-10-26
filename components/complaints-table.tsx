@@ -1469,8 +1469,8 @@ export default function ComplaintsTable({
                       className="flex-1 cursor-pointer"
                       onClick={() => toggleRowExpansion(complaint.id)}
                     >
-                      <div className="flex items-center gap-2">
-                        {complaint.attentionScore && (
+                      <div className="flex items-center gap-2 mb-2">
+                        {/* {complaint.attentionScore && (
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -1489,15 +1489,30 @@ export default function ComplaintsTable({
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
-                        )}
+                        )} */}
                         <span className="font-mono text-xs text-muted-foreground">
                           {complaint.id}
                         </span>
+                        {complaint.type && (
+                          <>
+                            <span className="text-gray-300 dark:text-gray-700">
+                              •
+                            </span>
+                            {/* <Badge
+                              variant="outline"
+                              className="text-xs font-medium"
+                            > */}
+                            <span className="font-mono text-xs text-muted-foreground">
+                              {complaint.type}
+                            </span>
+                            {/* </Badge> */}
+                          </>
+                        )}
                         <span className="text-gray-300 dark:text-gray-700">
                           •
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {format(new Date(complaint.submittedDate), "PP")}
+                          {format(new Date(complaint.submittedDate), "PPp")}
                         </span>
                         {complaint.linkedComplaintIds &&
                           complaint.linkedComplaintIds.length > 0 && (
@@ -1519,7 +1534,9 @@ export default function ComplaintsTable({
                           )}
                       </div>
                       <h3 className="font-medium text-base leading-tight group-hover:text-primary">
-                        {complaint.description}
+                        {!isExpanded && complaint.description.length > 400
+                          ? `${complaint.description.substring(0, 350)}...`
+                          : complaint.description}
                       </h3>
                     </div>
                     <div className="flex items-center gap-2">

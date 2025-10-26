@@ -7,8 +7,8 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Allow access to sign-in page
-        if (req.nextUrl.pathname.startsWith("/auth/signin")) {
+        // Allow access to all auth pages
+        if (req.nextUrl.pathname.startsWith("/auth/")) {
           return true;
         }
         // Require authentication for all other routes
@@ -19,11 +19,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: [
-    "/",
-    "/api/complaints/:path*",
-    "/api/analytics/:path*",
-    "/api/ai/:path*",
-    "/auth/signin",
-  ],
+  matcher: ["/", "/auth/:path*"],
 };

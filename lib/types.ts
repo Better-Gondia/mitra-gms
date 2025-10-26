@@ -115,6 +115,8 @@ export type MediaAttachment = {
   extension: string;
 };
 
+export type ComplaintType = "COMPLAINT" | "SUGGESTION";
+
 export type Complaint = {
   id: string;
   title: string;
@@ -131,6 +133,7 @@ export type Complaint = {
   media?: MediaAttachment[];
   linkedComplaintIds?: string[];
   attentionScore?: number;
+  type?: ComplaintType;
 };
 
 export type SortDescriptor = {

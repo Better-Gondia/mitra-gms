@@ -7,6 +7,7 @@ import type {
   Priority as DBPriority,
   Department as DBDepartment,
   ComplaintStatus as DBStatus,
+  ComplaintType as DBComplaintType,
 } from "@prisma/client";
 
 // Map DB enums to UI strings
@@ -74,9 +75,24 @@ const priorityToUI = (
 const priorityToDB = (p: UIComplaint["priority"] | undefined): DBPriority =>
   p === "High" ? "HIGH" : "NORMAL";
 
+function generateComplaintIdFromDate(
+  complaintId: number,
+  createdAt: string | Date = new Date()
+): string {
+  const date = new Date(createdAt); // Works with ISO string or Date object
+
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0"); // Month is 0-indexed
+  const yy = String(date.getFullYear()).slice(-2);
+
+  const paddedId = String(complaintId).padStart(4, "0");
+
+  return `BG-${dd}${mm}${yy}-${paddedId}`;
+}
+
 export function mapDbComplaintToUi(db: Complaint): UIComplaint {
   const ui: UIComplaint = {
-    id: `GC-${db.id}`,
+    id: generateComplaintIdFromDate(db.id, db.createdAt),
     title: db.title ?? "",
     description: db.description ?? "",
     status: statusMapToUI[db.status],
@@ -88,6 +104,7 @@ export function mapDbComplaintToUi(db: Complaint): UIComplaint {
     category: db.category ?? "",
     subcategory: db.subcategory ?? "",
     location: db.location ?? "",
+    type: db.type as UIComplaint["type"] | undefined,
     media:
       Array.isArray(db.media) && db.media.length > 0
         ? db.media
@@ -122,7 +139,12 @@ export function mapDbComplaintToUi(db: Complaint): UIComplaint {
         : undefined,
     linkedComplaintIds:
       db.linkedComplaintIds?.map((id) =>
-        id.startsWith("GC-") ? id : `GC-${id}`
+        id.startsWith("BG-")
+          ? id
+          : generateComplaintIdFromDate(
+              parseInt(id.replace("BG-", "").split("-")[1] || "0"),
+              new Date()
+            )
       ) ?? [],
   };
   return ui;
@@ -130,8 +152,12 @@ export function mapDbComplaintToUi(db: Complaint): UIComplaint {
 
 export function parseUiIdToDbId(uiIdOrNumeric: string | number): number {
   if (typeof uiIdOrNumeric === "number") return uiIdOrNumeric;
-  const m = uiIdOrNumeric.match(/^(?:GC-)?(\d+)$/i);
-  return m ? parseInt(m[1], 10) : NaN;
+  // Handle new BG-DDMMYY-#### format
+  const m = uiIdOrNumeric.match(/^BG-\d{6}-(\d+)$/i);
+  if (m) return parseInt(m[1], 10);
+  // Handle old GC-#### format
+  const oldM = uiIdOrNumeric.match(/^(?:GC-)?(\d+)$/i);
+  return oldM ? parseInt(oldM[1], 10) : NaN;
 }
 
 export const Mapper = {

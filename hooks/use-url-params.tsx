@@ -42,7 +42,7 @@ const defaultFilters: FilterState = {
 };
 
 const defaultSort: SortDescriptor = {
-  column: "last_updated",
+  column: "id",
   direction: "descending",
 };
 

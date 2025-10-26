@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const linked = searchParams.get("linked") === "true";
 
     // Sorting parameters
-    const sortBy = searchParams.get("sortBy") || "updatedAt";
+    const sortBy = searchParams.get("sortBy") || "id";
     const sortOrder = searchParams.get("sortOrder") || "desc";
 
     // Build where clause
@@ -107,21 +107,21 @@ export async function GET(request: NextRequest) {
     } else if (sortBy === "location") {
       orderBy.location = sortOrder;
     } else {
-      // Default to updatedAt descending
-      orderBy.updatedAt = "desc";
+      // Default to id descending
+      orderBy.id = "desc";
     }
 
     // Get total count for pagination
     // Note: Using findMany with select instead of count() because count() doesn't support contains operations
     const totalCountResult = await prisma.complaint.findMany({
-      where,
+      where: { ...where, phase: "COMPLETED" },
       select: { id: true },
     });
     const totalCount = totalCountResult.length;
 
     // Fetch complaints with pagination
     const complaints = await prisma.complaint.findMany({
-      where,
+      where: { ...where, phase: "COMPLETED" },
       orderBy,
       skip: offset,
       take: limit,

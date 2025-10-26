@@ -20,17 +20,20 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
-    try {
-      const hasCompleted = localStorage.getItem(ONBOARDING_STORAGE_KEY) === 'true';
-      setHasCompletedOnboarding(hasCompleted);
-      if (!hasCompleted) {
-        setShowWelcome(true);
-      }
-    } catch (error) {
-      console.error("Could not read from localStorage", error);
-      // Default to completed if localStorage is unavailable
-      setHasCompletedOnboarding(true);
-    }
+    // try {
+    //   const hasCompleted = localStorage.getItem(ONBOARDING_STORAGE_KEY) === 'true';
+    //   setHasCompletedOnboarding(hasCompleted);
+    //   if (!hasCompleted) {
+    //     setShowWelcome(true);
+    //   }
+    // } catch (error) {
+    //   console.error("Could not read from localStorage", error);
+    //   // Default to completed if localStorage is unavailable
+    //   setHasCompletedOnboarding(true);
+    // }
+    // Always set onboarding as completed and never show welcome popup
+    setHasCompletedOnboarding(true);
+    setShowWelcome(false);
   }, []);
 
   const finishOnboarding = useCallback(() => {
