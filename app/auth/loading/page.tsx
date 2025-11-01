@@ -6,9 +6,9 @@ import { Loader2 } from "lucide-react";
 
 export default function AuthLoading() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-40">
+      <div className="absolute inset-0 opacity-40 dark:opacity-20">
         <div
           className="absolute inset-0"
           style={{
@@ -18,15 +18,17 @@ export default function AuthLoading() {
       </div>
 
       <div className="relative w-full max-w-md">
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 text-center">
+        <div className="bg-card/80 dark:bg-card/60 backdrop-blur-sm rounded-2xl shadow-2xl p-8 text-center border border-border/50">
           <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
             <Logo width={32} height={32} />
           </div>
 
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">
+          <h1 className="text-2xl font-bold text-foreground mb-2">
             GMS by Better Gondia
           </h1>
-          <p className="text-slate-600 mb-8">Loading your dashboard...</p>
+          <p className="text-muted-foreground mb-8">
+            Loading your dashboard...
+          </p>
 
           <div className="flex justify-center">
             <Loader2 className="h-8 w-8 text-primary animate-spin" />

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { ShieldX, LogOut, Mail, RefreshCw, Loader2 } from "lucide-react";
 import { MahaGovLogo } from "@/components/mahagov-logo";
+import { Logo } from "@/components/logo";
 import type { ExtendedSession } from "@/lib/auth";
 import { useState } from "react";
 
@@ -66,21 +67,23 @@ export default function AccessNotGranted() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="mx-auto w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-6">
-            <ShieldX className="h-8 w-8 text-amber-600" />
+          <div className="mx-auto w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-6">
+            <Logo width={32} height={32} />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">Loading...</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            Loading...
+          </h1>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-40">
+      <div className="absolute inset-0 opacity-40 dark:opacity-20">
         <div
           className="absolute inset-0"
           style={{
@@ -90,16 +93,16 @@ export default function AccessNotGranted() {
       </div>
 
       <div className="relative w-full max-w-md">
-        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+        <Card className="shadow-2xl border bg-card/80 backdrop-blur-sm dark:bg-card/60 dark:border-border/50">
           <CardHeader className="text-center space-y-4 pb-8">
-            <div className="mx-auto w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
-              <ShieldX className="h-8 w-8 text-amber-600" />
+            <div className="mx-auto w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+              <ShieldX className="h-8 w-8 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold text-slate-800">
+              <CardTitle className="text-2xl font-bold text-foreground">
                 Access Not Granted
               </CardTitle>
-              <CardDescription className="text-slate-600 mt-2">
+              <CardDescription className="text-muted-foreground mt-2">
                 You don&apos;t have access to visit this website. Please contact
                 the Better Gondia team to grant access to GMS.
               </CardDescription>
@@ -108,17 +111,17 @@ export default function AccessNotGranted() {
 
           <CardContent className="space-y-6">
             {userEmail && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-blue-900">
+                    <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
                       Your Email
                     </p>
-                    <p className="text-sm text-blue-700 mt-1 break-all">
+                    <p className="text-sm text-blue-700 dark:text-blue-300 mt-1 break-all">
                       {userEmail}
                     </p>
-                    <p className="text-xs text-blue-600 mt-2">
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
                       Share this email address with the Better Gondia team for
                       access.
                     </p>
@@ -157,7 +160,7 @@ export default function AccessNotGranted() {
             </div>
 
             <div className="text-center">
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 If you believe this is an error, please contact support
               </p>
             </div>
@@ -167,8 +170,9 @@ export default function AccessNotGranted() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
+            <Logo width={24} height={24} />
             {/* <MahaGovLogo className="h-6 w-6" /> */}
-            <span className="text-sm font-medium text-slate-600">
+            <span className="text-sm font-medium text-muted-foreground">
               GMS by Better Gondia
             </span>
           </div>

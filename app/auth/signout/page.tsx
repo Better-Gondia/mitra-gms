@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { LogOut, CheckCircle, ArrowLeft } from "lucide-react";
 import { MahaGovLogo } from "@/components/mahagov-logo";
+import { Logo } from "@/components/logo";
 import Link from "next/link";
 
 export default function SignOut() {
@@ -29,9 +30,9 @@ export default function SignOut() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-40">
+      <div className="absolute inset-0 opacity-40 dark:opacity-20">
         <div
           className="absolute inset-0"
           style={{
@@ -41,16 +42,16 @@ export default function SignOut() {
       </div>
 
       <div className="relative w-full max-w-md">
-        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+        <Card className="shadow-2xl border bg-card/80 backdrop-blur-sm dark:bg-card/60 dark:border-border/50">
           <CardHeader className="text-center space-y-4 pb-8">
-            <div className="mx-auto w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center">
-              <LogOut className="h-8 w-8 text-orange-600" />
+            <div className="mx-auto w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+              <LogOut className="h-8 w-8 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold text-slate-800">
+              <CardTitle className="text-2xl font-bold text-foreground">
                 Signing Out
               </CardTitle>
-              <CardDescription className="text-slate-600 mt-2">
+              <CardDescription className="text-muted-foreground mt-2">
                 You are being signed out of your account. Thank you for using
                 GMS by Better Gondia.
               </CardDescription>
@@ -84,7 +85,7 @@ export default function SignOut() {
             </div>
 
             <div className="text-center">
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 You will be redirected to the sign-in page automatically
               </p>
             </div>
@@ -94,8 +95,9 @@ export default function SignOut() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
+            <Logo width={24} height={24} />
             {/* <MahaGovLogo className="h-6 w-6" /> */}
-            <span className="text-sm font-medium text-slate-600">
+            <span className="text-sm font-medium text-muted-foreground">
               GMS by Better Gondia
             </span>
           </div>

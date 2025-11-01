@@ -78,7 +78,9 @@ function SignInContent() {
           {/* Left Side - Branding & Features */}
           <div className="text-center lg:text-left space-y-8">
             <div className="flex items-center justify-center lg:justify-start gap-3 mb-6">
-              <Logo width={48} height={48} />
+              <div className="flex-shrink-0">
+                <Logo width={48} height={48} className="drop-shadow-sm" />
+              </div>
               {/* <MahaGovLogo className="h-12 w-12" /> */}
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-blue-600 to-cyan-600 bg-clip-text text-transparent">

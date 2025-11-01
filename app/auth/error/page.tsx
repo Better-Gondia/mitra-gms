@@ -29,9 +29,9 @@ function AuthErrorContent() {
     errorMessages[error || "Default"] || errorMessages.Default;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-40">
+      <div className="absolute inset-0 opacity-40 dark:opacity-20">
         <div
           className="absolute inset-0"
           style={{
@@ -41,16 +41,16 @@ function AuthErrorContent() {
       </div>
 
       <div className="relative w-full max-w-md">
-        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+        <Card className="shadow-2xl border bg-card/80 backdrop-blur-sm dark:bg-card/60 dark:border-border/50">
           <CardHeader className="text-center space-y-4 pb-8">
-            <div className="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
-              <AlertTriangle className="h-8 w-8 text-red-600" />
+            <div className="mx-auto w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+              <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-400" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold text-slate-800">
+              <CardTitle className="text-2xl font-bold text-foreground">
                 Authentication Error
               </CardTitle>
-              <CardDescription className="text-slate-600 mt-2">
+              <CardDescription className="text-muted-foreground mt-2">
                 {errorMessage}
               </CardDescription>
             </div>
@@ -78,7 +78,7 @@ function AuthErrorContent() {
             </div>
 
             <div className="text-center">
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 If the problem persists, please contact support
               </p>
             </div>
@@ -90,7 +90,7 @@ function AuthErrorContent() {
           <div className="flex items-center justify-center gap-2 mb-2">
             <Logo width={24} height={24} />
             {/* <MahaGovLogo className="h-6 w-6" /> */}
-            <span className="text-sm font-medium text-slate-600">
+            <span className="text-sm font-medium text-muted-foreground">
               GMS by Better Gondia
             </span>
           </div>
@@ -107,15 +107,15 @@ export default function AuthError() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
               <Logo width={32} height={32} />
             </div>
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
               Loading...
             </h1>
-            <p className="text-slate-600">
+            <p className="text-muted-foreground">
               Please wait while we load the error page.
             </p>
           </div>

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { MahaGovLogo } from "@/components/mahagov-logo";
+import { Logo } from "@/components/logo";
 
 export default function AuthCallback() {
   const { data: session, status } = useSession();
@@ -42,9 +43,9 @@ export default function AuthCallback() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
         {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-40">
+        <div className="absolute inset-0 opacity-40 dark:opacity-20">
           <div
             className="absolute inset-0"
             style={{
@@ -54,16 +55,16 @@ export default function AuthCallback() {
         </div>
 
         <div className="relative w-full max-w-md">
-          <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+          <Card className="shadow-2xl border bg-card/80 backdrop-blur-sm dark:bg-card/60 dark:border-border/50">
             <CardHeader className="text-center space-y-4 pb-8">
               <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                 <Loader2 className="h-8 w-8 text-primary animate-spin" />
               </div>
               <div>
-                <CardTitle className="text-2xl font-bold text-slate-800">
+                <CardTitle className="text-2xl font-bold text-foreground">
                   Authenticating...
                 </CardTitle>
-                <CardDescription className="text-slate-600 mt-2">
+                <CardDescription className="text-muted-foreground mt-2">
                   Please wait while we verify your credentials
                 </CardDescription>
               </div>
@@ -79,8 +80,9 @@ export default function AuthCallback() {
           {/* Footer */}
           <div className="mt-8 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
+              <Logo width={24} height={24} />
               {/* <MahaGovLogo className="h-6 w-6" /> */}
-              <span className="text-sm font-medium text-slate-600">
+              <span className="text-sm font-medium text-muted-foreground">
                 GMS by Better Gondia
               </span>
             </div>
@@ -95,9 +97,9 @@ export default function AuthCallback() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
         {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-40">
+        <div className="absolute inset-0 opacity-40 dark:opacity-20">
           <div
             className="absolute inset-0"
             style={{
@@ -107,16 +109,16 @@ export default function AuthCallback() {
         </div>
 
         <div className="relative w-full max-w-md">
-          <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+          <Card className="shadow-2xl border bg-card/80 backdrop-blur-sm dark:bg-card/60 dark:border-border/50">
             <CardHeader className="text-center space-y-4 pb-8">
-              <div className="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
-                <AlertCircle className="h-8 w-8 text-red-600" />
+              <div className="mx-auto w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
               </div>
               <div>
-                <CardTitle className="text-2xl font-bold text-slate-800">
+                <CardTitle className="text-2xl font-bold text-foreground">
                   Authentication Failed
                 </CardTitle>
-                <CardDescription className="text-slate-600 mt-2">
+                <CardDescription className="text-muted-foreground mt-2">
                   {error}
                 </CardDescription>
               </div>
@@ -135,8 +137,9 @@ export default function AuthCallback() {
           {/* Footer */}
           <div className="mt-8 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
+              <Logo width={24} height={24} />
               {/* <MahaGovLogo className="h-6 w-6" /> */}
-              <span className="text-sm font-medium text-slate-600">
+              <span className="text-sm font-medium text-muted-foreground">
                 GMS by Better Gondia
               </span>
             </div>
@@ -151,9 +154,9 @@ export default function AuthCallback() {
 
   // Success state
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-40">
+      <div className="absolute inset-0 opacity-40 dark:opacity-20">
         <div
           className="absolute inset-0"
           style={{
@@ -163,16 +166,16 @@ export default function AuthCallback() {
       </div>
 
       <div className="relative w-full max-w-md">
-        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+        <Card className="shadow-2xl border bg-card/80 backdrop-blur-sm dark:bg-card/60 dark:border-border/50">
           <CardHeader className="text-center space-y-4 pb-8">
-            <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-              <CheckCircle className="h-8 w-8 text-green-600" />
+            <div className="mx-auto w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold text-slate-800">
+              <CardTitle className="text-2xl font-bold text-foreground">
                 Welcome!
               </CardTitle>
-              <CardDescription className="text-slate-600 mt-2">
+              <CardDescription className="text-muted-foreground mt-2">
                 Authentication successful. Redirecting to dashboard...
               </CardDescription>
             </div>
@@ -189,7 +192,8 @@ export default function AuthCallback() {
         <div className="mt-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             {/* <MahaGovLogo className="h-6 w-6" /> */}
-            <span className="text-sm font-medium text-slate-600">
+            <Logo width={24} height={24} />
+            <span className="text-sm font-medium text-muted-foreground">
               GMS by Better Gondia
             </span>
           </div>

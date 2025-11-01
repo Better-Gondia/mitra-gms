@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 
 interface LogoProps {
@@ -14,7 +16,7 @@ export function Logo({ width = 40, height = 40, className }: LogoProps) {
   return (
     <Image
       src="/logo_png.png"
-      alt="GMS by Better Gondia Logo"
+      alt=""
       width={widthNum}
       height={heightNum}
       className={className}
