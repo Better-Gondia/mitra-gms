@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { AlertTriangle, ArrowLeft, RefreshCw } from "lucide-react";
 import { MahaGovLogo } from "@/components/mahagov-logo";
+import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -87,14 +88,15 @@ function AuthErrorContent() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <MahaGovLogo className="h-6 w-6" />
+            <Logo width={24} height={24} />
+            {/* <MahaGovLogo className="h-6 w-6" /> */}
             <span className="text-sm font-medium text-slate-600">
-              Better Gondia Mitra
+              GMS by Better Gondia
             </span>
           </div>
-          <p className="text-xs text-slate-500">
+          {/* <p className="text-xs text-slate-500">
             © 2024 Maharashtra Government
-          </p>
+          </p> */}
         </div>
       </div>
     </div>
@@ -108,7 +110,7 @@ export default function AuthError() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-              <MahaGovLogo className="h-8 w-8 text-primary" />
+              <Logo width={32} height={32} />
             </div>
             <h1 className="text-2xl font-bold text-slate-800 mb-2">
               Loading...

@@ -30,6 +30,7 @@ import {
   List,
   AreaChart,
   X,
+  FilterX,
   AlertTriangle,
   Loader2,
   Sparkles,
@@ -54,6 +55,7 @@ import {
   ArrowUp,
   ArrowUpDown,
   MapPin,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/use-language";
@@ -114,6 +116,7 @@ import KpiSkeleton from "@/components/kpi-skeleton";
 import { useRole } from "@/hooks/use-role";
 import { useAdvancedFeatures } from "@/hooks/use-advanced-features";
 import { useComplaintsWithFilters } from "@/hooks/use-complaints-with-filters";
+import { prepareComplaintsForExport } from "@/lib/export-to-excel";
 import {
   Card,
   CardHeader,
@@ -134,49 +137,78 @@ import { Checkbox } from "./ui/checkbox";
 
 const REMARK_CHAR_LIMIT = 280;
 
+// Map UI role names to backend Role enum strings for notifications
+const uiRoleToDbRole: Record<string, string> = {
+  "District Collector": "DISTRICT_COLLECTOR",
+  "Collector Team": "COLLECTOR_TEAM",
+  "Department Team": "DEPARTMENT_TEAM",
+  "Superintendent of Police": "SUPERINTENDENT_OF_POLICE",
+  "MP Rajya Sabha": "MP_RAJYA_SABHA",
+  "MP Lok Sabha": "MP_LOK_SABHA",
+  "MLA Gondia": "MLA_GONDIA",
+  "MLA Tirora": "MLA_TIRORA",
+  "MLA Sadak Arjuni": "MLA_ARJUNI_MORGAON",
+  "MLA Deori": "MLA_AMGAON_DEORI",
+  MLC: "MLC",
+  "Zila Parishad": "ZP_CEO",
+};
+
+function extractTaggedRolesFromRemark(text: string): string[] {
+  if (!text) return [];
+  // Match tags like @Department, @Department Team, @MP Lok Sabha, etc.
+  const tags = Array.from(text.matchAll(/@([A-Za-z][A-Za-z ]{0,50})/g)).map(
+    (m) => m[1].trim()
+  );
+  const uniqueUiRoles = Array.from(new Set(tags));
+  const mapped = uniqueUiRoles
+    .map((ui) => uiRoleToDbRole[ui])
+    .filter((v): v is string => Boolean(v));
+  return Array.from(new Set(mapped));
+}
+
 type TrendIndicatorProps = {
   trend: number;
   sentiment: "good" | "bad";
 };
 
-const TrendIndicator: React.FC<TrendIndicatorProps> = ({
-  trend,
-  sentiment,
-}) => {
-  const isPositiveChange =
-    (sentiment === "good" && trend > 0) || (sentiment === "bad" && trend < 0);
-  const isNegativeChange =
-    (sentiment === "good" && trend < 0) || (sentiment === "bad" && trend > 0);
+// const TrendIndicator: React.FC<TrendIndicatorProps> = ({
+//   trend,
+//   sentiment,
+// }) => {
+//   const isPositiveChange =
+//     (sentiment === "good" && trend > 0) || (sentiment === "bad" && trend < 0);
+//   const isNegativeChange =
+//     (sentiment === "good" && trend < 0) || (sentiment === "bad" && trend > 0);
 
-  const Icon = trend > 0 ? TrendingUp : trend < 0 ? TrendingDown : Minus;
-  const colorClass = isPositiveChange
-    ? "text-green-500 dark:text-green-400"
-    : isNegativeChange
-    ? "text-red-500 dark:text-red-400"
-    : "text-slate-500 dark:text-slate-400";
+//   const Icon = trend > 0 ? TrendingUp : trend < 0 ? TrendingDown : Minus;
+//   const colorClass = isPositiveChange
+//     ? "text-green-500 dark:text-green-400"
+//     : isNegativeChange
+//     ? "text-red-500 dark:text-red-400"
+//     : "text-slate-500 dark:text-slate-400";
 
-  const description =
-    trend !== 0
-      ? `${Math.abs(trend).toFixed(1)}% ${
-          trend > 0 ? "increase" : "decrease"
-        } from previous 7 days`
-      : "No change from previous 7 days";
+//   const description =
+//     trend !== 0
+//       ? `${Math.abs(trend).toFixed(1)}% ${
+//           trend > 0 ? "increase" : "decrease"
+//         } from previous 7 days`
+//       : "No change from previous 7 days";
 
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex items-center gap-1">
-            <Icon className={cn("h-5 w-5", colorClass)} />
-          </div>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{description}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-};
+//   return (
+//     <TooltipProvider>
+//       <Tooltip>
+//         <TooltipTrigger asChild>
+//           <div className="flex items-center gap-1">
+//             <Icon className={cn("h-5 w-5", colorClass)} />
+//           </div>
+//         </TooltipTrigger>
+//         <TooltipContent>
+//           <p>{description}</p>
+//         </TooltipContent>
+//       </Tooltip>
+//     </TooltipProvider>
+//   );
+// };
 
 type KpiCardProps = {
   title: string;
@@ -221,7 +253,7 @@ const KpiCard: React.FC<KpiCardProps> = ({
       <div className="relative z-10">
         <CardHeader className="flex-row items-center justify-between space-y-0 p-4 pb-0">
           <CardTitle className="text-sm font-medium">{title}</CardTitle>
-          <TrendIndicator trend={trend} sentiment={trendSentiment} />
+          {/* <TrendIndicator trend={trend} sentiment={trendSentiment} /> */}
         </CardHeader>
         <CardContent className="p-4 pt-2">
           <div className="flex items-baseline gap-2">
@@ -584,6 +616,10 @@ export default function ComplaintsView({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
   const [staleFilterIds, setStaleFilterIds] = useState<string[]>([]);
+  // Local state for date range selection to allow intermediate selection
+  const [localDateRange, setLocalDateRange] = useState<DateRange | undefined>(
+    undefined
+  );
 
   // Local search state for controlled search behavior
   const [localSearchTerm, setLocalSearchTerm] = useState("");
@@ -702,27 +738,127 @@ export default function ComplaintsView({
   const handleResetFilters = () => {
     resetFilters();
     setStaleFilterIds([]);
+    setLocalSearchTerm("");
+    setIsDatePopoverOpen(false);
+    setLocalDateRange(undefined);
   };
 
   const handleRelativeDateChange = (value: string) => {
     const now = new Date();
     const today = startOfDay(now);
+    let range: DateRange | undefined;
+
     if (value === "today") {
-      updateFilter("dateRange", { from: today, to: now });
+      range = { from: today, to: now };
     } else if (value === "last7") {
-      updateFilter("dateRange", { from: subDays(today, 6), to: now });
+      range = { from: subDays(today, 6), to: now };
     } else if (value === "last30") {
-      updateFilter("dateRange", { from: subDays(today, 29), to: now });
+      range = { from: subDays(today, 29), to: now };
     } else {
-      updateFilter("dateRange", undefined);
+      range = undefined;
     }
+
+    setLocalDateRange(range);
+    updateFilter("dateRange", range);
     setIsDatePopoverOpen(false);
   };
 
   const handleDateSelect = (range: DateRange | undefined) => {
-    updateFilter("dateRange", range);
-    if (range?.from && range?.to) {
-      setIsDatePopoverOpen(false);
+    if (!range) {
+      // Clear if range is cleared
+      setLocalDateRange(undefined);
+      updateFilter("dateRange", undefined);
+      return;
+    }
+
+    // If we already have a complete range (both from and to), clicking a new date should start a new selection
+    if (localDateRange?.from && localDateRange?.to && range.from && !range.to) {
+      // User clicked a new date after having a complete range - start new selection
+      const newDate = range.from;
+      const existingFrom = localDateRange.from;
+      const existingTo = localDateRange.to;
+
+      // Compare new date with existing range to determine if it should be start or end
+      if (newDate < existingFrom) {
+        // New date is before existing range, make it the new start date
+        // Keep the existing end date as the new end
+        const normalizedRange = {
+          from: newDate,
+          to: existingTo,
+        };
+        setLocalDateRange(normalizedRange);
+        updateFilter("dateRange", normalizedRange);
+        setIsDatePopoverOpen(false);
+      } else if (newDate > existingTo) {
+        // New date is after existing range, make it the new end date
+        // Keep the existing start date as the new start
+        const normalizedRange = {
+          from: existingFrom,
+          to: newDate,
+        };
+        setLocalDateRange(normalizedRange);
+        updateFilter("dateRange", normalizedRange);
+        setIsDatePopoverOpen(false);
+      } else if (newDate >= existingFrom && newDate <= existingTo) {
+        // New date is within existing range, start a new selection from this date
+        setLocalDateRange({ from: newDate, to: undefined });
+      }
+    } else if (
+      range.from &&
+      !range.to &&
+      localDateRange?.from &&
+      !localDateRange?.to
+    ) {
+      // User is selecting second date during initial selection
+      // Compare with the existing from date to determine if it should be start or end
+      const newDate = range.from;
+      const existingFrom = localDateRange.from;
+
+      if (newDate < existingFrom) {
+        // New date is before existing from, swap them
+        const normalizedRange = {
+          from: newDate,
+          to: existingFrom,
+        };
+        setLocalDateRange(normalizedRange);
+        updateFilter("dateRange", normalizedRange);
+        setIsDatePopoverOpen(false);
+      } else if (newDate > existingFrom) {
+        // New date is after existing from, make it the end date
+        const normalizedRange = {
+          from: existingFrom,
+          to: newDate,
+        };
+        setLocalDateRange(normalizedRange);
+        updateFilter("dateRange", normalizedRange);
+        setIsDatePopoverOpen(false);
+      } else {
+        // Same date clicked, reset to just this date
+        setLocalDateRange({ from: newDate, to: undefined });
+      }
+    } else if (range.from && range.to) {
+      // Both dates selected - ensure they're in correct order
+      const fromDate = range.from;
+      const toDate = range.to;
+
+      if (fromDate > toDate) {
+        // Swap if they're in wrong order
+        const normalizedRange = {
+          from: toDate,
+          to: fromDate,
+        };
+        setLocalDateRange(normalizedRange);
+        updateFilter("dateRange", normalizedRange);
+        setIsDatePopoverOpen(false);
+      } else {
+        // Already in correct order
+        setLocalDateRange(range);
+        updateFilter("dateRange", range);
+        setIsDatePopoverOpen(false);
+      }
+    } else if (range.from && !range.to) {
+      // Just from date selected (first click of new selection)
+      setLocalDateRange(range);
     }
   };
 
@@ -802,14 +938,27 @@ export default function ComplaintsView({
   const queryClient = useQueryClient();
 
   // Update mutation for individual complaints
+  const loadingToastRef = useRef<string | null>(null);
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: any }) =>
       apiPatchComplaint(id, payload),
+    onMutate: () => {
+      // Show loading toast while the API call is in-flight
+      loadingToastRef.current = toast.loading(t("saving_changes"));
+    },
+    onSuccess: () => {
+      // Resolve loading toast into success
+      if (loadingToastRef.current) toast.dismiss(loadingToastRef.current);
+      toast.success(t("complaint_updated"));
+    },
     onError: () => {
-      toast.error("Failed to save update. Reverting changes.");
+      // Resolve loading toast into error
+      if (loadingToastRef.current) toast.dismiss(loadingToastRef.current);
+      toast.error(t("failed_to_save_update"));
       queryClient.invalidateQueries({ queryKey: ["complaints"] });
     },
     onSettled: () => {
+      // Always refetch after error or success
       queryClient.invalidateQueries({ queryKey: ["complaints"] });
     },
   });
@@ -876,6 +1025,16 @@ export default function ComplaintsView({
       location: updatedComplaint.location,
       linkedComplaintIds: updatedComplaint.linkedComplaintIds,
     };
+    if (remark && remark.trim()) {
+      payload.remark = remark;
+      if (remarkVisibility) {
+        payload.remarkVisibility = remarkVisibility;
+      }
+      const tagged = extractTaggedRolesFromRemark(remark);
+      if (tagged.length > 0) {
+        payload.taggedRoles = tagged;
+      }
+    }
     updateMutation.mutate({ id: updatedComplaint.id, payload });
   };
 
@@ -911,6 +1070,11 @@ export default function ComplaintsView({
   useEffect(() => {
     setLocalSearchTerm(urlFilters.searchTerm);
   }, [urlFilters.searchTerm]);
+
+  // Sync local date range with URL filter when it changes externally
+  useEffect(() => {
+    setLocalDateRange(urlFilters.dateRange);
+  }, [urlFilters.dateRange]);
 
   useEffect(() => {
     setSelectedRows(new Set());
@@ -1038,7 +1202,9 @@ export default function ComplaintsView({
     if (selectedRows.size === 0) {
       return { commonStatus: null, possibleActions: [] };
     }
-    const selectedComplaints = paginatedComplaints.filter((c) => selectedRows.has(c.id));
+    const selectedComplaints = paginatedComplaints.filter((c) =>
+      selectedRows.has(c.id)
+    );
     const firstStatus = selectedComplaints[0].status;
     const allSameStatus = selectedComplaints.every(
       (c) => c.status === firstStatus
@@ -1063,7 +1229,7 @@ export default function ComplaintsView({
     setIsBulkActionModalOpen(true);
   };
 
-  const handleExecuteBulkAction = () => {
+  const handleExecuteBulkAction = async () => {
     const updates: Complaint[] = [];
     const now = new Date();
 
@@ -1137,8 +1303,11 @@ export default function ComplaintsView({
       }
     });
 
+    // Show a loading toast for bulk action processing
+    const bulkToastId = toast.loading("Applying bulk changes...");
     handleUpdateComplaints(updates);
-
+    await queryClient.invalidateQueries({ queryKey: ["complaints"] });
+    toast.dismiss(bulkToastId);
     toast.success(`${selectedRows.size} complaints have been updated.`);
 
     setIsBulkActionModalOpen(false);
@@ -1312,7 +1481,9 @@ export default function ComplaintsView({
 
   const complaintToShow = useMemo(() => {
     if (selectedComplaintId) {
-      return paginatedComplaints.find((c) => c.id === selectedComplaintId) || null;
+      return (
+        paginatedComplaints.find((c) => c.id === selectedComplaintId) || null
+      );
     }
     return null;
   }, [selectedComplaintId, paginatedComplaints]);
@@ -1428,6 +1599,48 @@ export default function ComplaintsView({
           ? "descending"
           : "ascending",
     });
+  };
+
+  const handleExportToExcel = async () => {
+    try {
+      // Show loading toast
+      const loadingToast = toast.loading(t("downloading_excel"));
+
+      // Dynamically import xlsx
+      const XLSX = await import("xlsx");
+
+      // Prepare data for export - use only the data visible in the grid
+      const exportData = prepareComplaintsForExport(
+        paginatedComplaints,
+        visibleOptionalColumns
+      );
+
+      // Create workbook and worksheet
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Complaints");
+
+      // Set column widths for better readability
+      const colWidths = Object.keys(exportData[0] || {}).map((key) => ({
+        wch: Math.max(key.length, 20),
+      }));
+      ws["!cols"] = colWidths;
+
+      // Generate filename with current date
+      const filename = `complaints_export_${
+        new Date().toISOString().split("T")[0]
+      }.xlsx`;
+
+      // Write and download the file
+      XLSX.writeFile(wb, filename);
+
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToast);
+      toast.success(t("excel_export_successful"));
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+      toast.error(t("excel_export_failed"));
+    }
   };
 
   return (
@@ -1554,77 +1767,97 @@ export default function ComplaintsView({
                   dialogTitle="Filter by Tehsil"
                 />
 
-                <Popover
-                  open={isDatePopoverOpen}
-                  onOpenChange={setIsDatePopoverOpen}
-                >
-                  <PopoverTrigger asChild>
-                    <Button
-                      id="date"
-                      variant={"outline"}
-                      className={cn(
-                        "w-full md:w-[260px] justify-start text-left font-normal h-9 text-sm",
-                        !urlFilters.dateRange
-                          ? "text-muted-foreground"
-                          : "text-foreground bg-blue-50 dark:bg-blue-950"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {urlFilters.dateRange?.from ? (
-                        urlFilters.dateRange.to ? (
-                          <>
-                            {format(urlFilters.dateRange.from, "LLL dd, y")} -{" "}
-                            {format(urlFilters.dateRange.to, "LLL dd, y")}
-                          </>
+                <div className="flex items-center gap-1">
+                  <Popover
+                    open={isDatePopoverOpen}
+                    onOpenChange={setIsDatePopoverOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        id="date"
+                        variant={"outline"}
+                        className={cn(
+                          "w-full md:w-[260px] justify-start text-left font-normal h-9 text-sm",
+                          !urlFilters.dateRange
+                            ? "text-muted-foreground"
+                            : "text-foreground bg-blue-50 dark:bg-blue-950"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {urlFilters.dateRange?.from ? (
+                          urlFilters.dateRange.to ? (
+                            <>
+                              {format(urlFilters.dateRange.from, "LLL dd, y")} -{" "}
+                              {format(urlFilters.dateRange.to, "LLL dd, y")}
+                            </>
+                          ) : (
+                            format(urlFilters.dateRange.from, "LLL dd, y")
+                          )
                         ) : (
-                          format(urlFilters.dateRange.from, "LLL dd, y")
-                        )
-                      ) : (
-                        <span>{t("pick_a_date_range")}</span>
-                      )}
+                          <span>{t("pick_a_date_range")}</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="flex p-0" align="end">
+                      <div className="flex flex-col gap-2 border-r p-3">
+                        <Button
+                          variant="ghost"
+                          className="justify-start h-8"
+                          onClick={() => handleRelativeDateChange("all")}
+                        >
+                          {t("all_time")}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="justify-start h-8"
+                          onClick={() => handleRelativeDateChange("today")}
+                        >
+                          {t("today")}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="justify-start h-8"
+                          onClick={() => handleRelativeDateChange("last7")}
+                        >
+                          {t("last_7_days")}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="justify-start h-8"
+                          onClick={() => handleRelativeDateChange("last30")}
+                        >
+                          {t("last_30_days")}
+                        </Button>
+                      </div>
+                      <Calendar
+                        initialFocus
+                        mode="range"
+                        defaultMonth={
+                          localDateRange?.from || urlFilters.dateRange?.from
+                        }
+                        selected={localDateRange ?? urlFilters.dateRange}
+                        onSelect={handleDateSelect}
+                        numberOfMonths={1}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {urlFilters.dateRange?.from && urlFilters.dateRange?.to && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 flex-shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLocalDateRange(undefined);
+                        updateFilter("dateRange", undefined);
+                        setIsDatePopoverOpen(false);
+                      }}
+                      aria-label="Clear date filter"
+                    >
+                      <X className="h-4 w-4" />
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="flex p-0" align="end">
-                    <div className="flex flex-col gap-2 border-r p-3">
-                      <Button
-                        variant="ghost"
-                        className="justify-start h-8"
-                        onClick={() => handleRelativeDateChange("all")}
-                      >
-                        {t("all_time")}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="justify-start h-8"
-                        onClick={() => handleRelativeDateChange("today")}
-                      >
-                        {t("today")}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="justify-start h-8"
-                        onClick={() => handleRelativeDateChange("last7")}
-                      >
-                        {t("last_7_days")}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="justify-start h-8"
-                        onClick={() => handleRelativeDateChange("last30")}
-                      >
-                        {t("last_30_days")}
-                      </Button>
-                    </div>
-                    <Calendar
-                      initialFocus
-                      mode="range"
-                      defaultMonth={urlFilters.dateRange?.from}
-                      selected={urlFilters.dateRange}
-                      onSelect={handleDateSelect}
-                      numberOfMonths={1}
-                    />
-                  </PopoverContent>
-                </Popover>
+                  )}
+                </div>
               </div>
 
               {features.enableAdvancedFilters && (
@@ -1711,11 +1944,12 @@ export default function ComplaintsView({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9"
+                        variant="outline"
+                        // size="icon"
+                        // className="h-9 w-9"
                         onClick={handleResetFilters}
                       >
+                        {t("reset_filters")}
                         <RotateCcw className="h-4 w-4" />
                         <span className="sr-only">{t("reset_filters")}</span>
                       </Button>
@@ -1760,7 +1994,17 @@ export default function ComplaintsView({
                 </DropdownMenu>
 
                 <div className="flex items-center gap-2">
-                  {features.enableStaleFilter && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9"
+                    onClick={handleExportToExcel}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    {t("export")}
+                  </Button>
+
+                  {/* {features.enableStaleFilter && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -1775,9 +2019,9 @@ export default function ComplaintsView({
                       )}
                       {t("find_stale")}
                     </Button>
-                  )}
+                  )} */}
 
-                  {features.enableAIAttentionScore && (
+                  {/* {features.enableAIAttentionScore && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -1792,64 +2036,13 @@ export default function ComplaintsView({
                       )}
                       Scores
                     </Button>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
 
             <div className="flex flex-col gap-4">
-              <div className="px-2 text-sm text-muted-foreground flex items-center justify-between">
-                <span>
-                  Showing {filteredComplaints.length} complaint
-                  {filteredComplaints.length === 1 ? "" : "s"}.
-                </span>
-                <div className="flex items-center gap-1">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-9">
-                        <ArrowUpDown className="mr-2 h-4 w-4" />
-                        <span>Sort by: {currentSortLabel}</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuRadioGroup
-                        value={urlSortDescriptor.column}
-                        onValueChange={(val) =>
-                          updateSort({
-                            ...urlSortDescriptor,
-                            column: val as any,
-                          })
-                        }
-                      >
-                        {sortColumnOptions.map((opt) => (
-                          <DropdownMenuRadioItem
-                            key={opt.value}
-                            value={opt.value}
-                          >
-                            {opt.label}
-                          </DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9"
-                    onClick={toggleSortDirection}
-                  >
-                    {urlSortDescriptor.direction === "ascending" ? (
-                      <ArrowUp className="h-4 w-4" />
-                    ) : (
-                      <ArrowDown className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              {staleFilterIds.length > 0 && (
+              {/* {staleFilterIds.length > 0 && (
                 <div className="flex items-center justify-between gap-3 rounded-lg border border-yellow-500/30 bg-yellow-50 dark:bg-yellow-950/30 px-4 py-3 text-sm text-yellow-700 dark:text-yellow-300">
                   <div className="flex items-center gap-3">
                     <AlertTriangle className="h-5 w-5" />
@@ -1881,9 +2074,53 @@ export default function ComplaintsView({
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-              )}
+              )} */}
 
-              {selectedRows.size > 0 && (
+              {/* Pagination at top - merged with sort controls */}
+              <PaginationControls
+                currentPage={urlPagination.currentPage}
+                setCurrentPage={(page) =>
+                  updatePagination({ currentPage: page })
+                }
+                totalItems={
+                  // Always use filteredComplaints.length because it represents
+                  // the actual visible items after all filters (server + client-side)
+                  filteredComplaints.length
+                }
+                itemsPerPage={urlPagination.rowsPerPage}
+                setRowsPerPage={(limit) =>
+                  updatePagination({ rowsPerPage: limit, currentPage: 1 })
+                }
+                totalPages={
+                  // Calculate total pages based on actual filtered items
+                  filteredComplaints.length > 0
+                    ? Math.ceil(
+                        filteredComplaints.length / urlPagination.rowsPerPage
+                      )
+                    : 0
+                }
+                hasNextPage={
+                  // Calculate based on filtered results
+                  urlPagination.currentPage <
+                  Math.ceil(
+                    filteredComplaints.length / urlPagination.rowsPerPage
+                  )
+                }
+                hasPrevPage={urlPagination.currentPage > 1}
+                currentPageItems={paginatedComplaints.length}
+                sortOptions={sortColumnOptions}
+                currentSortColumn={urlSortDescriptor.column}
+                currentSortDirection={urlSortDescriptor.direction}
+                onSortChange={(column) =>
+                  updateSort({
+                    ...urlSortDescriptor,
+                    column: column as SortDescriptor["column"],
+                  })
+                }
+                onSortDirectionToggle={toggleSortDirection}
+              />
+
+              {/* {selectedRows.size > 0 && (
                 <div className="flex items-center justify-between gap-3 rounded-lg border border-blue-500/30 bg-blue-50 dark:bg-blue-950/30 px-4 py-3 text-sm text-blue-800 dark:text-blue-200 sticky top-20 z-20">
                   <div className="flex items-center gap-2">
                     <Checkbox
@@ -1915,7 +2152,7 @@ export default function ComplaintsView({
                     </Button>
                   </div>
                 </div>
-              )}
+              )} */}
 
               {isDataLoading ? (
                 // ||  isFetching
@@ -1940,22 +2177,6 @@ export default function ComplaintsView({
                   visibleOptionalColumns={visibleOptionalColumns}
                 />
               )}
-              <PaginationControls
-                currentPage={urlPagination.currentPage}
-                setCurrentPage={(page) =>
-                  updatePagination({ currentPage: page })
-                }
-                totalItems={
-                  serverPagination?.totalCount || filteredComplaints.length
-                }
-                itemsPerPage={urlPagination.rowsPerPage}
-                setRowsPerPage={(limit) =>
-                  updatePagination({ rowsPerPage: limit, currentPage: 1 })
-                }
-                totalPages={serverPagination?.totalPages}
-                hasNextPage={serverPagination?.hasNextPage}
-                hasPrevPage={serverPagination?.hasPrevPage}
-              />
             </div>
           </>
         </div>

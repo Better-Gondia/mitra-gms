@@ -1,4 +1,6 @@
 export type UserRole =
+  | "SuperAdmin"
+  | "Admin"
   | "Collector Team"
   | "Department Team"
   | "District Collector"
@@ -10,7 +12,8 @@ export type UserRole =
   | "MLA Tirora"
   | "MLA Sadak Arjuni"
   | "MLA Deori"
-  | "MLC";
+  | "MLC"
+  | "Zila Parishad";
 
 export const userRoles = [
   "District Collector",
@@ -117,6 +120,32 @@ export type MediaAttachment = {
 
 export type ComplaintType = "COMPLAINT" | "SUGGESTION";
 
+export type Remark = {
+  id: number;
+  userId: number;
+  role: string;
+  visibility: RemarkVisibility;
+  notes: string;
+  createdAt: Date;
+  user: {
+    name: string;
+  };
+};
+
+export type Notification = {
+  id: number;
+  forRole: string;
+  type: "REMARK" | "STATUS_CHANGE" | "TAG" | "ASSIGNMENT";
+  title: string;
+  message?: string;
+  createdByUser?: {
+    id: number;
+    name: string;
+    role: string;
+  };
+  createdAt: Date;
+};
+
 export type Complaint = {
   id: string;
   title: string;
@@ -124,16 +153,27 @@ export type Complaint = {
   status: ComplaintStatus;
   priority?: Priority;
   department?: Department;
+  taluka?: string;
   submittedDate: Date;
   lastUpdated: Date;
   history: ComplaintHistoryEntry[];
+  remarks?: Remark[];
   category: string;
   subcategory: string;
   location: string;
   media?: MediaAttachment[];
   linkedComplaintIds?: string[];
   attentionScore?: number;
+  coSignCount?: number;
   type?: ComplaintType;
+  // Split and merge fields
+  displayId?: string;
+  parentComplaintId?: number;
+  splitIndex?: number;
+  mergedIntoComplaintId?: number;
+  originalComplaintIds?: number[];
+  isSplit?: boolean;
+  isMerged?: boolean;
 };
 
 export type SortDescriptor = {

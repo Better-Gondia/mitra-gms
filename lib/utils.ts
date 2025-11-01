@@ -12,6 +12,7 @@ import {
   differenceInHours,
   differenceInDays,
 } from "date-fns";
+import { Role } from "@prisma/client";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -91,6 +92,7 @@ export interface ComplaintsQueryParams {
   limit?: number;
   search?: string;
   status?: string;
+  statuses?: string; // comma-separated list of statuses
   department?: string;
   tehsil?: string;
   dateFrom?: string;
@@ -147,13 +149,35 @@ export function generateComplaintIdFromDate(
   complaintId: number,
   createdAt: string | Date = new Date()
 ): string {
-  const date = new Date(createdAt); // Works with ISO string or Date object
+  // const date = new Date(createdAt); // Works with ISO string or Date object
 
-  const dd = String(date.getDate()).padStart(2, "0");
-  const mm = String(date.getMonth() + 1).padStart(2, "0"); // Month is 0-indexed
-  const yy = String(date.getFullYear()).slice(-2);
+  // const dd = String(date.getDate()).padStart(2, "0");
+  // const mm = String(date.getMonth() + 1).padStart(2, "0"); // Month is 0-indexed
+  // const yy = String(date.getFullYear()).slice(-2);
 
-  const paddedId = String(complaintId).padStart(4, "0");
+  // const paddedId = String(complaintId).padStart(4, "0");
 
-  return `BG-${dd}${mm}${yy}-${paddedId}`;
+  // return `BG-${dd}${mm}${yy}-${paddedId}`;
+  // New format: BG-{id} (e.g., BG-1234)
+  return `BG-${complaintId}`;
 }
+
+export const isCollectorView = (role: Role) => {
+  return (
+    role === Role.DISTRICT_COLLECTOR ||
+    role === Role.SUPERINTENDENT_OF_POLICE ||
+    role === Role.MP_RAJYA_SABHA ||
+    role === Role.MP_LOK_SABHA ||
+    role === Role.MLA_GONDIA ||
+    role === Role.MLA_TIRORA ||
+    role === Role.MLA_ARJUNI_MORGAON ||
+    role === Role.MLA_AMGAON_DEORI ||
+    role === Role.MLC ||
+    role === Role.ZP_CEO ||
+    role === Role.IFS
+  );
+};
+
+export const isDepartmentView = (role: Role) => role === Role.DEPARTMENT_TEAM;
+
+export const isCollectorTeamView = (role: Role) => role === Role.COLLECTOR_TEAM;

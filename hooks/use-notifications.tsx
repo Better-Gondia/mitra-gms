@@ -1,67 +1,128 @@
+"use client";
 
-
-'use client';
-
-import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
-import type { UserRole } from '@/lib/types';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+} from "react";
+import type { UserRole } from "@/lib/types";
 
 export type AppNotification = {
   id: number;
+  title?: string;
+  type?: "REMARK" | "STATUS_CHANGE" | "TAG" | "ASSIGNMENT";
   message: string;
   timestamp: Date;
   read: boolean;
   targetRole?: UserRole;
+  // Numeric complaint id as string for search; derived by parsing message
   complaintId?: string;
 };
 
 type NotificationContextType = {
   notifications: AppNotification[];
   unreadCount: number;
-  addNotification: (notification: { message: string, targetRole?: UserRole, complaintId?: string }) => void;
   markAsRead: (id: number) => void;
-  markAllAsRead: () => void;
+  markAllAsRead: () => Promise<void>;
 };
 
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+const NotificationContext = createContext<NotificationContextType | undefined>(
+  undefined
+);
 
-let notificationId = 0;
-
-export function NotificationProvider({ children }: { children: React.ReactNode }) {
+export function NotificationProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [hasNotifications, setHasNotifications] = useState<boolean>(false);
 
-  const addNotification = useCallback(({ message, targetRole, complaintId }: { message: string, targetRole?: UserRole, complaintId?: string }) => {
-    const newNotification: AppNotification = {
-      id: notificationId++,
-      message,
-      timestamp: new Date(),
-      read: false,
-      targetRole,
-      complaintId,
-    };
-    setNotifications(prev => [newNotification, ...prev]);
+  const fetchRoleAndHasNotifications = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/check-role", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      setHasNotifications(Boolean(data?.hasNotifications));
+    } catch {}
   }, []);
 
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await fetch("/api/notifications", { cache: "no-store" });
+      if (!res.ok) return;
+      const items: Array<{
+        id: number;
+        title: string;
+        type?: "REMARK" | "STATUS_CHANGE" | "TAG" | "ASSIGNMENT";
+        message?: string;
+        createdAt: string;
+      }> = await res.json();
+      const mapped: AppNotification[] = items.map((n) => {
+        // Try to extract a numeric complaint id from the message text
+        const maybeId = n.message?.match(/\b(\d{1,})\b/);
+        const complaintId = maybeId?.[1];
+        return {
+          id: n.id,
+          title: n.title,
+          type: n.type,
+          message: n.message || n.title,
+          timestamp: new Date(n.createdAt),
+          read: false,
+          complaintId,
+        };
+      });
+      setNotifications(mapped);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    // Initial load
+    fetchRoleAndHasNotifications();
+    fetchNotifications();
+    // Poll occasionally for updates
+    const interval = setInterval(() => {
+      fetchRoleAndHasNotifications();
+      fetchNotifications();
+    }, 60_000);
+    return () => clearInterval(interval);
+  }, [fetchRoleAndHasNotifications, fetchNotifications]);
+
   const markAsRead = useCallback((id: number) => {
-    setNotifications(prev =>
-      prev.map(n => (n.id === id ? { ...n, read: true } : n))
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
   }, []);
 
-  const markAllAsRead = useCallback(() => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  const markAllAsRead = useCallback(async () => {
+    try {
+      await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "markAsRead" }),
+      });
+      setHasNotifications(false);
+    } catch {}
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   }, []);
 
-  const unreadCount = useMemo(() => {
-    return notifications.filter(n => !n.read).length;
-  }, [notifications]);
+  const unreadCount = useMemo(
+    () => (hasNotifications ? 1 : 0),
+    [hasNotifications]
+  );
 
-  const value = useMemo(() => ({
-    notifications,
-    unreadCount,
-    addNotification,
-    markAsRead,
-    markAllAsRead,
-  }), [notifications, unreadCount, addNotification, markAsRead, markAllAsRead]);
+  const value = useMemo(
+    () => ({
+      notifications,
+      unreadCount,
+      markAsRead,
+      markAllAsRead,
+    }),
+    [notifications, unreadCount, markAsRead, markAllAsRead]
+  );
 
   return (
     <NotificationContext.Provider value={value}>
@@ -73,7 +134,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 export function useNotifications() {
   const context = useContext(NotificationContext);
   if (context === undefined) {
-    throw new Error('useNotifications must be used within a NotificationProvider');
+    throw new Error(
+      "useNotifications must be used within a NotificationProvider"
+    );
   }
   return context;
 }

@@ -83,7 +83,12 @@ import {
   Link as LinkIcon,
   Edit2,
   MapPin,
+  Share2,
+  Hand,
+  GitBranch,
+  GitMerge,
 } from "lucide-react";
+import { SplitComplaintDialog } from "@/components/split-complaint-dialog";
 import { Button } from "./ui/button";
 import { cn, formatPreciseDuration } from "@/lib/utils";
 import { useLanguage } from "@/hooks/use-language";
@@ -155,6 +160,7 @@ import { Separator } from "./ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { ScrollArea } from "./ui/scroll-area";
 import MediaAttachments from "./media-attachments";
+import { MergeComplaintsDialog } from "@/components/merge-complaints-dialog";
 
 const REMARK_CHAR_LIMIT = 280;
 
@@ -165,31 +171,39 @@ const HorizontalTimeline: React.FC<{ complaint: Complaint }> = ({
 
   const getStatusInfo = (
     status: ComplaintStatus
-  ): { date: Date | null; user: string | null; notes: string | undefined } => {
+  ): {
+    date: Date | null;
+    user: string | null;
+    role: UserRole | null;
+    notes: string | undefined;
+  } => {
     if (status === "Open") {
       const submissionEntry = complaint.history.find(
         (h) => h.action === "Complaint Submitted"
       ) || {
         timestamp: complaint.submittedDate,
         user: "Citizen",
+        role: "Citizen" as UserRole,
         notes: complaint.description,
       };
       return {
         date: new Date(submissionEntry.timestamp),
         user: submissionEntry.user,
+        role: submissionEntry.role || ("Citizen" as UserRole),
         notes: submissionEntry.notes,
       };
     }
     const historyEntry = [...complaint.history]
       .sort(
         (a, b) =>
-          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       )
       .find((h) => h.action.includes(status));
 
     return {
       date: historyEntry?.timestamp ? new Date(historyEntry.timestamp) : null,
       user: historyEntry?.user || null,
+      role: (historyEntry?.role as UserRole) || null,
       notes: historyEntry?.notes,
     };
   };
@@ -349,7 +363,8 @@ const HorizontalTimeline: React.FC<{ complaint: Complaint }> = ({
             );
           }
 
-          const eventsInSegment = useMemo(() => {
+          // Compute events in segment directly (no hooks inside loops)
+          const eventsInSegment = (() => {
             if (!prevStepInfo?.date) return [];
             const segmentEndDate = stepInfo.date || new Date();
             return relevantHistoryEntries.filter((entry) => {
@@ -358,7 +373,7 @@ const HorizontalTimeline: React.FC<{ complaint: Complaint }> = ({
                 entryDate > prevStepInfo.date! && entryDate <= segmentEndDate
               );
             });
-          }, [prevStepInfo, stepInfo, relevantHistoryEntries]);
+          })();
 
           const isConnectorSolid = index > 0 && isCompleted;
 
@@ -523,8 +538,26 @@ const HorizontalTimeline: React.FC<{ complaint: Complaint }> = ({
                         <p className="text-sm">
                           {format(new Date(stepInfo.date), "PPpp")}
                         </p>
-                        {stepInfo.user && (
-                          <p className="text-sm">By {stepInfo.user}</p>
+                        {((stepInfo.user && stepInfo.user !== "System") ||
+                          stepInfo.role) && (
+                          <p className="text-sm">
+                            By{" "}
+                            {stepInfo.user && stepInfo.user !== "System"
+                              ? `${stepInfo.user} (${
+                                  stepInfo.role
+                                    ? t(
+                                        stepInfo.role
+                                          .toLowerCase()
+                                          .replace(/ /g, "_")
+                                      )
+                                    : ""
+                                })`
+                              : stepInfo.role
+                              ? t(
+                                  stepInfo.role.toLowerCase().replace(/ /g, "_")
+                                )
+                              : ""}
+                          </p>
                         )}
                         {stepInfo.notes && (
                           <p className="text-sm text-muted-foreground mt-1 line-clamp-3">
@@ -580,7 +613,8 @@ const RemarkCard: React.FC<{
   const isInternalRemark = entry.visibility === "internal";
 
   const isLinkAction = entry.action === "Complaint Linked";
-  const linkedComplaintIdMatch = entry.notes?.match(/([A-Z]{2,3}-\d+)/);
+  // Match BG-{id} format or legacy formats
+  const linkedComplaintIdMatch = entry.notes?.match(/(BG-\d+(?:-\d+)?)/i);
   const linkedComplaintId = linkedComplaintIdMatch
     ? linkedComplaintIdMatch[0]
     : null;
@@ -670,7 +704,9 @@ const RemarkCard: React.FC<{
         <CardContent className="p-3 flex-1 flex flex-col">
           <div className="flex items-start justify-between gap-2 mb-1">
             <div className="flex items-center gap-2">
-              <p className="font-semibold text-sm">{linkedComplaint.id}</p>
+              <span className="font-mono text-sm font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
+                {linkedComplaint.id}
+              </span>
               <Badge
                 variant={statusColors[linkedComplaint.status]}
                 className="capitalize text-xs"
@@ -747,7 +783,7 @@ const RemarkCard: React.FC<{
             </Avatar>
             <div className="flex flex-col">
               <p className="font-semibold text-sm leading-tight">
-                {entry.user}
+                {entry.user} ({entry.role})
               </p>
               <p className="text-xs text-muted-foreground leading-tight">
                 <RelativeTime date={entry.timestamp} />
@@ -832,16 +868,26 @@ const ExpandedRowContent: React.FC<{
     "Department Team",
   ].includes(role);
 
-  const remarksHistory = useMemo(
-    () =>
-      [...complaint.history]
-        .filter((h) => h.notes || h.action === "Complaint Linked")
-        .sort(
-          (a, b) =>
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        ),
-    [complaint]
-  );
+  const remarksHistory = useMemo(() => {
+    const linkEntries = [...complaint.history]
+      .filter((h) => h.action === "Complaint Linked")
+      .map((h) => h);
+
+    const remarkEntries = (complaint.remarks || []).map((r) => ({
+      id: `remark-${r.id}`,
+      timestamp: r.createdAt as unknown as Date,
+      user: r.user?.name || "",
+      role: r.role as UserRole,
+      action: "Remark added",
+      notes: r.notes,
+      visibility: r.visibility,
+    }));
+
+    return [...linkEntries, ...remarkEntries].sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  }, [complaint]);
 
   return (
     <div className="flex flex-col bg-muted/30">
@@ -1114,6 +1160,10 @@ export default function ComplaintsTable({
   const [remarkVisibility, setRemarkVisibility] =
     useState<RemarkVisibility>("internal");
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
+  const [isMergeDialogOpen, setIsMergeDialogOpen] = useState(false);
+  const [isSplitDialogOpen, setIsSplitDialogOpen] = useState(false);
+  const [complaintToSplit, setComplaintToSplit] =
+    React.useState<Complaint | null>(null);
   const remarkTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [popoverError, setPopoverError] = useState<string | null>(null);
   const [complaintToLink, setComplaintToLink] =
@@ -1197,7 +1247,6 @@ export default function ComplaintsTable({
       remarkVisibility,
     });
 
-    toast.success(t("complaint_details_updated_successfully"));
     handlePopoverOpenChange(complaint.id, false);
   };
 
@@ -1245,10 +1294,175 @@ export default function ComplaintsTable({
   };
 
   const handleCopyLink = (id: string) => {
-    const link = `${window.location.origin}/?complaint_id=${id}`;
+    const link = `${window.location.origin}/?search=${id}`;
     navigator.clipboard.writeText(link).then(() => {
       toast.success(`Link to complaint ${id} has been copied.`);
     });
+  };
+
+  const handleShareOnWhatsApp = (complaint: Complaint) => {
+    const link = `${window.location.origin}/?search=${complaint.id}`;
+    const statusText = t(complaint.status.toLowerCase().replace(/ /g, "_"));
+    const message = `${t("complaint_id")}: ${complaint.id}\n${t(
+      "status"
+    )}: ${statusText}\n${complaint.description.substring(0, 100)}${
+      complaint.description.length > 100 ? "..." : ""
+    }\n\n${link}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
+  const handlePrintComplaint = (complaint: Complaint) => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+
+    const statusText = t(complaint.status.toLowerCase().replace(/ /g, "_"));
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>${complaint.id} - Complaint Details</title>
+          <style>
+            @page {
+              size: A4;
+              margin: 2cm;
+            }
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .header {
+              border-bottom: 3px solid #000;
+              padding-bottom: 20px;
+              margin-bottom: 30px;
+            }
+            .complaint-id {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            .metadata {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 20px;
+              margin: 20px 0;
+            }
+            .section {
+              margin: 30px 0;
+            }
+            .section-title {
+              font-weight: bold;
+              font-size: 18px;
+              margin-bottom: 10px;
+              border-bottom: 1px solid #ccc;
+              padding-bottom: 5px;
+            }
+            .description {
+              background: #f9f9f9;
+              padding: 15px;
+              border-left: 4px solid #007bff;
+              white-space: pre-wrap;
+            }
+            .status-badge {
+              display: inline-block;
+              padding: 5px 15px;
+              background: #007bff;
+              color: white;
+              border-radius: 5px;
+              font-weight: bold;
+              margin: 10px 0;
+            }
+            .footer {
+              position: fixed;
+              bottom: 0;
+              width: 100%;
+              text-align: center;
+              font-size: 12px;
+              color: #666;
+              border-top: 1px solid #ccc;
+              padding-top: 10px;
+            }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="complaint-id">${complaint.id}</div>
+            <div>Submitted: ${format(complaint.submittedDate, "PPpp")}</div>
+            <div>Last Updated: ${format(complaint.lastUpdated, "PPpp")}</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Status</div>
+            <div class="status-badge">${statusText}</div>
+          </div>
+
+          <div class="metadata">
+            <div>
+              <strong>Department:</strong> ${complaint.department || "N/A"}<br>
+              <strong>Category:</strong> ${complaint.category} / ${
+      complaint.subcategory
+    }<br>
+              <strong>Priority:</strong> ${complaint.priority || "Normal"}
+            </div>
+            <div>
+              <strong>Location:</strong> ${complaint.location || "N/A"}<br>
+              <strong>Co-signs:</strong> ${complaint.coSignCount || 0}<br>
+              <strong>Type:</strong> ${complaint.type || "Complaint"}
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Description</div>
+            <div class="description">${complaint.description}</div>
+          </div>
+
+          ${
+            complaint.media && complaint.media.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title">Media Attachments (${
+              complaint.media.length
+            })</div>
+            <div>${complaint.media
+              .map((m, i) => `${i + 1}. ${m.filename}`)
+              .join("<br>")}</div>
+          </div>
+          `
+              : ""
+          }
+
+          ${
+            complaint.linkedComplaintIds &&
+            complaint.linkedComplaintIds.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title">Linked Complaints</div>
+            <div>${complaint.linkedComplaintIds.join(", ")}</div>
+          </div>
+          `
+              : ""
+          }
+
+          <div class="footer">
+            Printed on ${format(new Date(), "PPpp")} | ${
+      window.location.hostname
+    }
+          </div>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
   };
 
   const checkEtaBusinessHours = (date: Date | undefined) => {
@@ -1430,8 +1644,110 @@ export default function ComplaintsTable({
     toast.success(`${complaint.id} and ${targetComplaintId} are now linked.`);
   };
 
+  const handleMergeComplaints = async (
+    complaintIds: string[],
+    primaryComplaintId: string,
+    mergeReason: string
+  ) => {
+    try {
+      const response = await fetch("/api/complaints/merge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          complaintIds,
+          primaryComplaintId,
+          mergeReason,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to merge complaints");
+      }
+
+      const result = await response.json();
+      toast.success(
+        `Successfully merged ${complaintIds.length} complaints into ${primaryComplaintId}.`
+      );
+
+      setIsMergeDialogOpen(false);
+      setSelectedRows(new Set());
+
+      // Refresh complaints - this will be handled by parent component
+      // Parent will handle refetch via query invalidation
+    } catch (error: any) {
+      console.error("Error merging complaints:", error);
+      toast.error(error.message || "Failed to merge complaints");
+      throw error;
+    }
+  };
+
+  const handleSplitComplaint = async (splits: any[]) => {
+    if (!complaintToSplit) return;
+
+    try {
+      const response = await fetch(
+        `/api/complaints/${complaintToSplit.id}/split`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ splits }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to split complaint");
+      }
+
+      const result = await response.json();
+      toast.success(
+        `Complaint split successfully into ${
+          result.displayIds?.length || splits.length
+        } complaints.`
+      );
+
+      setIsSplitDialogOpen(false);
+      setComplaintToSplit(null);
+
+      // Refresh complaints - this will be handled by parent component
+    } catch (error: any) {
+      console.error("Error splitting complaint:", error);
+      toast.error(error.message || "Failed to split complaint");
+      throw error;
+    }
+  };
+
+  const selectedComplaints = allComplaints.filter((c) =>
+    selectedRows.has(c.id)
+  );
+  const canMerge = selectedRows.size >= 2;
+  const canMergeUpdate = [
+    "District Collector",
+    "Collector Team",
+    "Department Team",
+  ].includes(role);
+
   return (
     <div className="space-y-4">
+      {canMerge && canMergeUpdate && (
+        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">
+              {selectedRows.size} complaint{selectedRows.size !== 1 ? "s" : ""}{" "}
+              selected
+            </span>
+          </div>
+          <Button
+            onClick={() => setIsMergeDialogOpen(true)}
+            size="sm"
+            variant="default"
+          >
+            <GitMerge className="mr-2 h-4 w-4" />
+            {t("merge_selected")}
+          </Button>
+        </div>
+      )}
       {complaints.length > 0 ? (
         complaints.map((complaint) => {
           const isExpanded = expandedRowId === complaint.id;
@@ -1458,12 +1774,12 @@ export default function ComplaintsTable({
                 <div className="p-4">
                   <div className="flex items-start gap-4">
                     <div className="mt-1 flex items-center gap-2">
-                      <Checkbox
+                      {/* <Checkbox
                         className="opacity-0 group-hover:opacity-100 transition-opacity data-[state=checked]:opacity-100"
                         checked={selectedRows.has(complaint.id)}
                         onCheckedChange={() => handleSelectRow(complaint.id)}
                         aria-label="Select complaint"
-                      />
+                      /> */}
                     </div>
                     <div
                       className="flex-1 cursor-pointer"
@@ -1490,9 +1806,21 @@ export default function ComplaintsTable({
                             </Tooltip>
                           </TooltipProvider>
                         )} */}
-                        <span className="font-mono text-xs text-muted-foreground">
+                        <span className="font-mono text-sm font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
                           {complaint.id}
                         </span>
+                        {complaint.isSplit && (
+                          <Badge variant="secondary" className="text-xs ml-1">
+                            <GitBranch className="mr-1 h-3 w-3" />
+                            Split
+                          </Badge>
+                        )}
+                        {complaint.isMerged && (
+                          <Badge variant="secondary" className="text-xs ml-1">
+                            <GitMerge className="mr-1 h-3 w-3" />
+                            Merged
+                          </Badge>
+                        )}
                         {complaint.type && (
                           <>
                             <span className="text-gray-300 dark:text-gray-700">
@@ -1894,10 +2222,34 @@ export default function ComplaintsTable({
                             <LinkIcon className="mr-2 h-4 w-4" />
                             <span>{t("link_complaint")}</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem onSelect={() => {}}>
-                            <Printer className="mr-2 h-4 w-4" />
-                            <span>{t("print")}</span>
-                          </DropdownMenuItem>
+                          {canUpdate &&
+                            !complaint.isSplit &&
+                            !complaint.isMerged && (
+                              <DropdownMenuItem
+                                onSelect={() => {
+                                  setComplaintToSplit(complaint);
+                                  setIsSplitDialogOpen(true);
+                                }}
+                              >
+                                <GitBranch className="mr-2 h-4 w-4" />
+                                <span>Split Complaint</span>
+                              </DropdownMenuItem>
+                            )}
+                          {canMergeUpdate && (
+                            <DropdownMenuItem
+                              onSelect={() => {
+                                // Open merge dialog with this complaint pre-selected
+                                const newSelection = new Set(selectedRows);
+                                newSelection.add(complaint.id);
+                                // setSelectedRows(newSelection);
+                                setIsMergeDialogOpen(true);
+                              }}
+                            >
+                              <GitMerge className="mr-2 h-4 w-4" />
+                              <span>{t("merge_complaints")}</span>
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
                           <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
                               <CopyIcon className="mr-2 h-4 w-4" />
@@ -1916,6 +2268,18 @@ export default function ComplaintsTable({
                               </DropdownMenuItem>
                             </DropdownMenuSubContent>
                           </DropdownMenuSub>
+                          <DropdownMenuItem
+                            onSelect={() => handleShareOnWhatsApp(complaint)}
+                          >
+                            <Share2 className="mr-2 h-4 w-4" />
+                            <span>{t("share_on_whatsapp")}</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onSelect={() => handlePrintComplaint(complaint)}
+                          >
+                            <Printer className="mr-2 h-4 w-4" />
+                            <span>{t("print_complaint")}</span>
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <Button
@@ -1932,6 +2296,24 @@ export default function ComplaintsTable({
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground mt-3 pl-11">
+                    {complaint.coSignCount && complaint.coSignCount > 0 && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center gap-1.5">
+                              <Hand className="size-3.5" />
+                              <span>{complaint.coSignCount}</span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              {complaint.coSignCount} co-sign
+                              {complaint.coSignCount > 1 ? "s" : ""}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
                     {visibleOptionalColumns.has("department") && (
                       <div className="flex items-center gap-1.5">
                         <Building className="size-3.5" />
@@ -1950,6 +2332,14 @@ export default function ComplaintsTable({
                       <div className="flex items-center gap-1.5">
                         <MapPin className="size-3.5" />
                         <span>{complaint.location || "N/A"}</span>
+                      </div>
+                    )}
+                    {complaint.taluka && (
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="size-3.5" />
+                        <span>
+                          {t("tehsil")}: {complaint.taluka}
+                        </span>
                       </div>
                     )}
                     {visibleOptionalColumns.has("last_updated") && (
@@ -2001,6 +2391,28 @@ export default function ComplaintsTable({
           currentComplaint={complaintToLink}
           allComplaints={allComplaints}
           onLink={handleLinkComplaint}
+        />
+      )}
+
+      {canMergeUpdate && (
+        <MergeComplaintsDialog
+          open={isMergeDialogOpen}
+          onOpenChange={setIsMergeDialogOpen}
+          complaints={allComplaints}
+          selectedComplaintIds={Array.from(selectedRows)}
+          onMerge={handleMergeComplaints}
+        />
+      )}
+
+      {canUpdate && complaintToSplit && (
+        <SplitComplaintDialog
+          open={isSplitDialogOpen}
+          onOpenChange={(open) => {
+            setIsSplitDialogOpen(open);
+            if (!open) setComplaintToSplit(null);
+          }}
+          complaint={complaintToSplit}
+          onSplit={handleSplitComplaint}
         />
       )}
     </div>

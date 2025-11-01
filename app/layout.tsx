@@ -16,7 +16,6 @@ import {
   Sun,
   Globe,
   Rocket,
-  Users,
   List,
   AreaChart,
   BellRing,
@@ -43,8 +42,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuFooter,
   DropdownMenuGroup,
   DropdownMenuSub,
@@ -70,7 +67,6 @@ import {
 } from "@/hooks/use-notifications";
 import { cn } from "@/lib/utils";
 import RelativeTime from "@/components/relative-time";
-import { userRoles } from "@/lib/types";
 import { Toaster } from "react-hot-toast";
 import { CommandPalette } from "@/components/command-palette";
 import {
@@ -141,6 +137,32 @@ function NotificationMenu() {
     useNotifications();
   const { role, setSelectedComplaintId, setDeepLinkedComplaintId } = useRole();
 
+  const formatNotificationMessage = (n: AppNotification): string => {
+    // Extract BG-style ref first, else any number
+    const refMatch = n.message?.match(/(BG-\d{6}-\d+)/i);
+    const numericMatch = n.message?.match(/\b(\d{1,})\b/);
+    const ref = refMatch?.[1] || numericMatch?.[1] || "";
+
+    switch ((n as any).type || "") {
+      case "ASSIGNMENT":
+        return t("notif_new_complaint_assigned_message").replace(
+          "{{ref}}",
+          ref
+        );
+      case "STATUS_CHANGE":
+        return t("notif_complaint_needs_details_message").replace(
+          "{{ref}}",
+          ref
+        );
+      case "REMARK":
+        return t("notif_new_remark_message").replace("{{ref}}", ref);
+      case "TAG":
+        return t("notif_tagged_message").replace("{{ref}}", ref);
+      default:
+        return n.message || "";
+    }
+  };
+
   const relevantNotifications = notifications.filter(
     (n) => !n.targetRole || n.targetRole === role
   );
@@ -161,7 +183,14 @@ function NotificationMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative h-9 w-9">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative h-9 w-9"
+          onClick={() => {
+            void markAllAsRead();
+          }}
+        >
           <Bell className="h-5 w-5" />
           {relevantUnreadCount > 0 && (
             <span className="absolute top-0 right-0 flex h-2 w-2">
@@ -211,7 +240,7 @@ function NotificationMenu() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm leading-snug text-wrap">
-                      {notif.message}
+                      {formatNotificationMessage(notif)}
                     </p>
                     <RelativeTime
                       date={notif.timestamp}
@@ -292,42 +321,42 @@ function LanguageSwitcher() {
   );
 }
 
-function RoleSwitcher() {
-  const { role, setRole, t } = useRole();
-  const { features } = useAdvancedFeatures();
+// function RoleSwitcher() {
+//   const { role, setRole, t } = useRole();
+//   const { features } = useAdvancedFeatures();
 
-  if (!features.enableRoleAndAnalyticsViews) {
-    return null;
-  }
+//   if (!features.enableRoleAndAnalyticsViews) {
+//     return null;
+//   }
 
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-9">
-          <Users className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">{t("current_role")}:</span>
-          <span className="font-semibold ml-1">
-            {t(role.toLowerCase().replace(/ /g, "_"))}
-          </span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>{t("select_role")}</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuRadioGroup
-          value={role}
-          onValueChange={(value) => setRole(value as any)}
-        >
-          {userRoles.map((r) => (
-            <DropdownMenuRadioItem key={r} value={r}>
-              {t(r.toLowerCase().replace(/ /g, "_"))}
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+//   return (
+//     <DropdownMenu>
+//       <DropdownMenuTrigger asChild>
+//         <Button variant="outline" className="h-9">
+//           <Users className="mr-2 h-4 w-4" />
+//           <span className="hidden sm:inline">{t("current_role")}:</span>
+//           <span className="font-semibold ml-1">
+//             {t(role.toLowerCase().replace(/ /g, "_"))}
+//           </span>
+//         </Button>
+//       </DropdownMenuTrigger>
+//       <DropdownMenuContent align="end" className="w-56">
+//         <DropdownMenuLabel>{t("select_role")}</DropdownMenuLabel>
+//         <DropdownMenuSeparator />
+//         <DropdownMenuRadioGroup
+//           value={role}
+//           onValueChange={(value) => setRole(value as any)}
+//         >
+//           {userRoles.map((r) => (
+//             <DropdownMenuRadioItem key={r} value={r}>
+//               {t(r.toLowerCase().replace(/ /g, "_"))}
+//             </DropdownMenuRadioItem>
+//           ))}
+//         </DropdownMenuRadioGroup>
+//       </DropdownMenuContent>
+//     </DropdownMenu>
+//   );
+// }
 
 function UserMenu() {
   const { t } = useLanguage();
@@ -362,6 +391,32 @@ function UserMenu() {
       .slice(0, 2);
   };
 
+  // Map database role enum to UI role string
+  const dbRoleToUIRole: Record<string, string> = {
+    DISTRICT_COLLECTOR: "District Collector",
+    COLLECTOR_TEAM: "Collector Team",
+    DEPARTMENT_TEAM: "Department Team",
+    SUPERINTENDENT_OF_POLICE: "Superintendent of Police",
+    MP_RAJYA_SABHA: "MP Rajya Sabha",
+    MP_LOK_SABHA: "MP Lok Sabha",
+    MLA_GONDIA: "MLA Gondia",
+    MLA_TIRORA: "MLA Tirora",
+    MLA_ARJUNI_MORGAON: "MLA Sadak Arjuni",
+    MLA_AMGAON_DEORI: "MLA Deori",
+    MLC: "MLC",
+    ZP_CEO: "Zila Parishad",
+    USER: "Citizen",
+    ADMIN: "Citizen",
+    SUPERADMIN: "Citizen",
+    IFS: "Citizen",
+  };
+
+  const getUserRoleDisplay = () => {
+    const dbRole = (session?.user as any)?.role || "USER";
+    const uiRole = dbRoleToUIRole[dbRole] || "Citizen";
+    return t(uiRole.toLowerCase().replace(/ /g, "_"));
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -387,92 +442,12 @@ function UserMenu() {
               {session?.user?.email || "user@example.com"}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              Role: {(session?.user as any)?.role || "USER"}
+              Role: {getUserRoleDisplay()}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            <span>{t("profile")}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>{t("settings")}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={startOnboarding}>
-            <Rocket className="mr-2 h-4 w-4" />
-            <span>Start Tour</span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <Sparkles className="mr-2 h-4 w-4" />
-            <span>Advanced Features</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="p-2 w-52">
-            <DropdownMenuCheckboxItem
-              checked={features.enableRoleAndAnalyticsViews}
-              onCheckedChange={(checked) =>
-                handleFeatureToggle("enableRoleAndAnalyticsViews", checked)
-              }
-            >
-              Analytics/Role Views
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={features.enableAdvancedColumns}
-              onCheckedChange={(checked) =>
-                handleFeatureToggle("enableAdvancedColumns", checked)
-              }
-            >
-              Enable Advanced Columns
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={features.enableAIAttentionScore}
-              onCheckedChange={(checked) =>
-                handleFeatureToggle("enableAIAttentionScore", checked)
-              }
-            >
-              Enable AI Attention Score
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={features.enableAdvancedFilters}
-              onCheckedChange={(checked) =>
-                handleFeatureToggle("enableAdvancedFilters", checked)
-              }
-            >
-              Enable Advanced Filters
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={features.enableStaleFilter}
-              onCheckedChange={(checked) =>
-                handleFeatureToggle("enableStaleFilter", checked)
-              }
-            >
-              Enable Stale Filter
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={features.enableAiSummary}
-              onCheckedChange={(checked) =>
-                handleFeatureToggle("enableAiSummary", checked)
-              }
-            >
-              Enable AI Summary
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={toggleAllFeatures}>
-              {areAllFeaturesEnabled() ? (
-                <XSquare className="mr-2 h-4 w-4" />
-              ) : (
-                <CheckSquare className="mr-2 h-4 w-4" />
-              )}
-              {areAllFeaturesEnabled() ? "Deselect All" : "Select All"}
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-        <DropdownMenuSeparator />
+
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>{t("log_out")}</span>
@@ -482,41 +457,41 @@ function UserMenu() {
   );
 }
 
-function ViewSwitcher() {
-  const { role, activeView, setActiveView } = useRole();
-  const { features } = useAdvancedFeatures();
+// function ViewSwitcher() {
+//   const { role, activeView, setActiveView } = useRole();
+//   const { features } = useAdvancedFeatures();
 
-  if (role !== "District Collector" || !features.enableRoleAndAnalyticsViews) {
-    return null;
-  }
+//   if (role !== "District Collector" || !features.enableRoleAndAnalyticsViews) {
+//     return null;
+//   }
 
-  return (
-    <ToggleGroup
-      type="single"
-      size="sm"
-      value={activeView}
-      onValueChange={(value) => {
-        if (value) setActiveView(value as any);
-      }}
-      className="border bg-background p-1 rounded-lg"
-    >
-      <ToggleGroupItem
-        value="list"
-        aria-label="Complaints List"
-        className="px-2 data-[state=on]:bg-primary/20 data-[state=on]:text-primary"
-      >
-        <List className="h-4 w-4" />
-      </ToggleGroupItem>
-      <ToggleGroupItem
-        value="analytics"
-        aria-label="Analytics Dashboard"
-        className="px-2 data-[state=on]:bg-primary/20 data-[state=on]:text-primary"
-      >
-        <AreaChart className="h-4 w-4" />
-      </ToggleGroupItem>
-    </ToggleGroup>
-  );
-}
+//   return (
+//     <ToggleGroup
+//       type="single"
+//       size="sm"
+//       value={activeView}
+//       onValueChange={(value) => {
+//         if (value) setActiveView(value as any);
+//       }}
+//       className="border bg-background p-1 rounded-lg"
+//     >
+//       <ToggleGroupItem
+//         value="list"
+//         aria-label="Complaints List"
+//         className="px-2 data-[state=on]:bg-primary/20 data-[state=on]:text-primary"
+//       >
+//         <List className="h-4 w-4" />
+//       </ToggleGroupItem>
+//       <ToggleGroupItem
+//         value="analytics"
+//         aria-label="Analytics Dashboard"
+//         className="px-2 data-[state=on]:bg-primary/20 data-[state=on]:text-primary"
+//       >
+//         <AreaChart className="h-4 w-4" />
+//       </ToggleGroupItem>
+//     </ToggleGroup>
+//   );
+// }
 
 function FeedbackDialog({
   open,
@@ -746,19 +721,20 @@ function AppLayoutContent({
       <NotificationController />
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6 z-50">
         <Link href="/" className="flex items-center gap-2">
-          <MahaGovLogo />
+          <Logo width={32} height={32} />
+          {/* <MahaGovLogo /> */}
           <div className="flex flex-col">
             <h1 className="text-lg font-semibold bg-gradient-to-r from-primary via-blue-500 to-cyan-500 bg-clip-text text-transparent">
-              Better Gondia Mitra
+              GMS by Better Gondia
             </h1>
             <p className="text-xs text-muted-foreground">
-              {t("grievance_management_system")}
+              Grievance Management System
             </p>
           </div>
         </Link>
         <div className="flex-1 flex justify-center items-center gap-4">
-          <RoleSwitcher />
-          <ViewSwitcher />
+          {/* <RoleSwitcher /> */}
+          {/* <ViewSwitcher /> */}
         </div>
 
         <div className="flex items-center gap-1">
@@ -802,14 +778,26 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>Better Gondia Mitra</title>
+        <title>GMS by Better Gondia</title>
         <meta
           name="description"
-          content="Complaint Management System for Gondia"
+          content="GMS by Better Gondia - Grievance Management System"
         />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#2274A5" />
-        <link rel="icon" href="/favicon.ico" id="favicon" />
+        <link rel="icon" href="/favicon.ico" id="favicon" sizes="any" />
+        <link
+          rel="icon"
+          href="/favicon-16x16.png"
+          type="image/png"
+          sizes="16x16"
+        />
+        <link
+          rel="icon"
+          href="/favicon-32x32.png"
+          type="image/png"
+          sizes="32x32"
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"

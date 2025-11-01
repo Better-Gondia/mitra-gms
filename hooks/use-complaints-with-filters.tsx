@@ -52,6 +52,14 @@ export function useComplaintsWithFilters({
     if (filters.statusFilter && filters.statusFilter !== "all") {
       params.status = filters.statusFilter;
     }
+    // Role-based status scoping when no explicit status filter is set
+    if (!filters.statusFilter || filters.statusFilter === "all") {
+      if (role === "Department Team") {
+        params.statuses = "Assigned,In Progress,Resolved,Backlog";
+      } else if (role === "Collector Team") {
+        params.statuses = "Open,Need Details,Invalid";
+      }
+    }
     if (filters.departmentFilter && filters.departmentFilter !== "all") {
       params.department = filters.departmentFilter;
     }
@@ -85,18 +93,9 @@ export function useComplaintsWithFilters({
         return true;
       }
       if (role === "Collector Team") {
-        if (complaint.status === "Need Details") return true;
-        return [
-          "Open",
-          "Assigned",
-          "In Progress",
-          "Resolved",
-          "Need Details",
-          "Invalid",
-        ].includes(complaint.status);
+        return ["Open", "Need Details", "Invalid"].includes(complaint.status);
       }
       if (role === "Department Team") {
-        if (complaint.status === "Need Details") return false;
         return ["Assigned", "In Progress", "Resolved", "Backlog"].includes(
           complaint.status
         );
@@ -158,28 +157,28 @@ export function useComplaintsWithFilters({
     };
 
     // Add server-side filters for KPI data
-    if (filters.searchTerm) {
-      params.search = filters.searchTerm;
-    }
-    if (filters.statusFilter && filters.statusFilter !== "all") {
-      params.status = filters.statusFilter;
-    }
-    if (filters.departmentFilter && filters.departmentFilter !== "all") {
-      params.department = filters.departmentFilter;
-    }
-    if (filters.tehsilFilter && filters.tehsilFilter !== "all") {
-      params.tehsil = filters.tehsilFilter;
-    }
-    if (filters.dateRange?.from) {
-      params.dateFrom = filters.dateRange.from.toISOString().split("T")[0];
-    }
-    if (filters.dateRange?.to) {
-      params.dateTo = filters.dateRange.to.toISOString().split("T")[0];
-    }
+    // if (filters.searchTerm) {
+    //   params.search = filters.searchTerm;
+    // }
+    // if (filters.statusFilter && filters.statusFilter !== "all") {
+    //   params.status = filters.statusFilter;
+    // }
+    // if (filters.departmentFilter && filters.departmentFilter !== "all") {
+    //   params.department = filters.departmentFilter;
+    // }
+    // if (filters.tehsilFilter && filters.tehsilFilter !== "all") {
+    //   params.tehsil = filters.tehsilFilter;
+    // }
+    // if (filters.dateRange?.from) {
+    //   params.dateFrom = filters.dateRange.from.toISOString().split("T")[0];
+    // }
+    // if (filters.dateRange?.to) {
+    //   params.dateTo = filters.dateRange.to.toISOString().split("T")[0];
+    // }
 
     return params;
-  }, [filters]);
-
+    // }, [filters]);
+  }, []);
   const { data: kpiData } = useComplaints({
     params: kpiParams,
     enabled: true, // Always fetch KPI data
@@ -200,18 +199,9 @@ export function useComplaintsWithFilters({
         return true;
       }
       if (role === "Collector Team") {
-        if (complaint.status === "Need Details") return true;
-        return [
-          "Open",
-          "Assigned",
-          "In Progress",
-          "Resolved",
-          "Need Details",
-          "Invalid",
-        ].includes(complaint.status);
+        return ["Open", "Need Details", "Invalid"].includes(complaint.status);
       }
       if (role === "Department Team") {
-        if (complaint.status === "Need Details") return false;
         return ["Assigned", "In Progress", "Resolved", "Backlog"].includes(
           complaint.status
         );
@@ -221,26 +211,8 @@ export function useComplaintsWithFilters({
 
     filtered = filtered.filter(isComplaintVisibleInRole);
 
-    // Client-side filters for KPI
-    if (filters.pinnedFilter) {
-      filtered = filtered.filter((c) => pinnedComplaints.has(c.id));
-    }
-    if (filters.myRemarksFilter) {
-      filtered = filtered.filter((c) => c.history.some((h) => h.role === role));
-    }
-    if (filters.mentionsFilter) {
-      filtered = filtered.filter((c) =>
-        c.history.some((h) => h.taggedUsers?.includes(role))
-      );
-    }
-    if (filters.linkedFilter) {
-      filtered = filtered.filter(
-        (c) => c.linkedComplaintIds && c.linkedComplaintIds.length > 0
-      );
-    }
-
     return filtered;
-  }, [kpiData?.data, role, filters, pinnedComplaints]);
+  }, [kpiData?.data, role]);
 
   return {
     data: paginatedComplaints,

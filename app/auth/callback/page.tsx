@@ -45,11 +45,14 @@ export default function AuthCallback() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-40">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e2e8f0' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e2e8f0' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          ></div>
         </div>
-        
+
         <div className="relative w-full max-w-md">
           <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
             <CardHeader className="text-center space-y-4 pb-8">
@@ -65,7 +68,7 @@ export default function AuthCallback() {
                 </CardDescription>
               </div>
             </CardHeader>
-            
+
             <CardContent className="space-y-6">
               <div className="flex justify-center">
                 <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
@@ -76,14 +79,14 @@ export default function AuthCallback() {
           {/* Footer */}
           <div className="mt-8 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <MahaGovLogo className="h-6 w-6" />
+              {/* <MahaGovLogo className="h-6 w-6" /> */}
               <span className="text-sm font-medium text-slate-600">
-                Better Gondia Mitra
+                GMS by Better Gondia
               </span>
             </div>
-            <p className="text-xs text-slate-500">
+            {/* <p className="text-xs text-slate-500">
               © 2024 Maharashtra Government
-            </p>
+            </p> */}
           </div>
         </div>
       </div>
@@ -95,11 +98,14 @@ export default function AuthCallback() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-40">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e2e8f0' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e2e8f0' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          ></div>
         </div>
-        
+
         <div className="relative w-full max-w-md">
           <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
             <CardHeader className="text-center space-y-4 pb-8">
@@ -115,9 +121,9 @@ export default function AuthCallback() {
                 </CardDescription>
               </div>
             </CardHeader>
-            
+
             <CardContent className="space-y-6">
-              <Button 
+              <Button
                 onClick={() => router.push("/auth/signin")}
                 className="w-full h-12 text-base font-medium"
               >
@@ -129,14 +135,14 @@ export default function AuthCallback() {
           {/* Footer */}
           <div className="mt-8 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <MahaGovLogo className="h-6 w-6" />
+              {/* <MahaGovLogo className="h-6 w-6" /> */}
               <span className="text-sm font-medium text-slate-600">
-                Better Gondia Mitra
+                GMS by Better Gondia
               </span>
             </div>
-            <p className="text-xs text-slate-500">
+            {/* <p className="text-xs text-slate-500">
               © 2024 Maharashtra Government
-            </p>
+            </p> */}
           </div>
         </div>
       </div>
@@ -148,11 +154,14 @@ export default function AuthCallback() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-40">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e2e8f0' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}></div>
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e2e8f0' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        ></div>
       </div>
-      
+
       <div className="relative w-full max-w-md">
         <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
           <CardHeader className="text-center space-y-4 pb-8">
@@ -168,7 +177,7 @@ export default function AuthCallback() {
               </CardDescription>
             </div>
           </CardHeader>
-          
+
           <CardContent className="space-y-6">
             <div className="flex justify-center">
               <div className="w-8 h-8 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
@@ -179,14 +188,14 @@ export default function AuthCallback() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <MahaGovLogo className="h-6 w-6" />
+            {/* <MahaGovLogo className="h-6 w-6" /> */}
             <span className="text-sm font-medium text-slate-600">
-              Better Gondia Mitra
+              GMS by Better Gondia
             </span>
           </div>
-          <p className="text-xs text-slate-500">
+          {/* <p className="text-xs text-slate-500">
             © 2024 Maharashtra Government
-          </p>
+          </p> */}
         </div>
       </div>
     </div>

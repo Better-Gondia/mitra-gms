@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     // Filtering parameters
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
+    const statuses = searchParams.get("statuses") || "";
     const department = searchParams.get("department") || "";
     const tehsil = searchParams.get("tehsil") || "";
     const dateFrom = searchParams.get("dateFrom");
@@ -48,12 +49,45 @@ export async function GET(request: NextRequest) {
         searchConditions.push({ id: searchAsNumber });
       }
 
+      // Check if search term is a complaint ID in format BG-{id} (e.g., BG-1234)
+      const bgIdMatch = search.match(/^BG-(\d+)$/i);
+      if (bgIdMatch) {
+        const numericId = parseInt(bgIdMatch[1]);
+        if (!isNaN(numericId)) {
+          searchConditions.push({ id: numericId });
+        }
+      }
+
+      // Check for legacy format BG-XXXXXX-NNNN (backward compatibility)
+      const legacyMatch = search.match(/^BG-\d{6}-(\d+)$/i);
+      if (legacyMatch) {
+        const numericId = parseInt(legacyMatch[1]);
+        if (!isNaN(numericId)) {
+          searchConditions.push({ id: numericId });
+        }
+      }
+
       where.OR = searchConditions;
     }
 
     // Status filter
-    if (status && status !== "all") {
-      where.status = status.toUpperCase();
+    if (statuses) {
+      const list = statuses
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map((s) => Mapper.statusToDB[s as keyof typeof Mapper.statusToDB])
+        .filter(Boolean);
+      if (list.length > 0) {
+        where.status = { in: list };
+      }
+    } else if (status && status !== "all") {
+      // Map UI status to DB status using the mapper
+      const dbStatus =
+        Mapper.statusToDB[status as keyof typeof Mapper.statusToDB];
+      if (dbStatus) {
+        where.status = dbStatus;
+      }
     }
 
     // Department filter
@@ -114,7 +148,7 @@ export async function GET(request: NextRequest) {
     // Get total count for pagination
     // Note: Using findMany with select instead of count() because count() doesn't support contains operations
     const totalCountResult = await prisma.complaint.findMany({
-      where: { ...where, phase: "COMPLETED" },
+      where: { department: where.department, phase: "COMPLETED" },
       select: { id: true },
     });
     const totalCount = totalCountResult.length;
@@ -126,9 +160,15 @@ export async function GET(request: NextRequest) {
       skip: offset,
       take: limit,
       include: {
-        user: true,
+        user: false,
         history: {
           orderBy: { createdAt: "desc" },
+        },
+        remarks: {
+          orderBy: { createdAt: "desc" },
+          include: {
+            user: true,
+          },
         },
       },
     });

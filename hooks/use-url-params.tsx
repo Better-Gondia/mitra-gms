@@ -119,14 +119,17 @@ export function useURLParams() {
           }
         }
 
-        if (filters.dateRange !== undefined) {
+        if ("dateRange" in filters) {
+          // Date range is being updated (either set or cleared)
           if (filters.dateRange?.from && filters.dateRange?.to) {
+            // Set date params if both dates are present
             current.set(
               "dateFrom",
               format(filters.dateRange.from, "yyyy-MM-dd")
             );
             current.set("dateTo", format(filters.dateRange.to, "yyyy-MM-dd"));
           } else {
+            // Clear date params if dateRange is undefined, null, or incomplete
             current.delete("dateFrom");
             current.delete("dateTo");
           }
@@ -252,9 +255,14 @@ export function useURLParams() {
 
   const updatePagination = useCallback(
     (pagination: Partial<PaginationState>) => {
-      updateURL({ pagination: { ...urlState.pagination, ...pagination } });
+      // Get current pagination state from URL to avoid stale state
+      const currentPagination: PaginationState = {
+        currentPage: parseInt(searchParams.get("page") || "1", 10),
+        rowsPerPage: parseInt(searchParams.get("limit") || "10", 10),
+      };
+      updateURL({ pagination: { ...currentPagination, ...pagination } });
     },
-    [updateURL, urlState.pagination]
+    [updateURL, searchParams]
   );
 
   const resetFilters = useCallback(() => {

@@ -10,20 +10,11 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import {
-  Users,
-  Sun,
-  Moon,
-  List,
-  AreaChart,
-  HelpCircle,
-  FileText,
-} from "lucide-react";
+import { Sun, Moon, List, AreaChart, HelpCircle, FileText } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { useTheme } from "@/hooks/use-theme";
 import { useRole } from "@/hooks/use-role";
 import { MOCK_COMPLAINTS } from "@/lib/mock-data";
-import { userRoles } from "@/lib/types";
 import { FaqDialog } from "@/components/faq-dialog";
 
 interface CommandPaletteProps {
@@ -60,18 +51,13 @@ const roleFaqs: Record<string, string[]> = {
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const { t, setLanguage } = useLanguage();
   const { toggleTheme } = useTheme();
-  const { role, setRole, setActiveView, setSelectedComplaintId } = useRole();
+  const { role, setActiveView, setSelectedComplaintId } = useRole();
   const [faqItem, setFaqItem] = React.useState<{ q: string; a: string } | null>(
     null
   );
 
   const handleSelectComplaint = (id: string) => {
     setSelectedComplaintId(id);
-    onOpenChange(false);
-  };
-
-  const handleSelectRole = (newRole: any) => {
-    setRole(newRole);
     onOpenChange(false);
   };
 
@@ -208,7 +194,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
           <CommandSeparator />
 
-          <CommandGroup heading="Roles">
+          {/* <CommandGroup heading="Roles">
             {userRoles.map((r) => (
               <CommandItem
                 key={r}
@@ -221,7 +207,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             ))}
           </CommandGroup>
 
-          <CommandSeparator />
+          <CommandSeparator /> */}
 
           <CommandGroup heading="Settings">
             <CommandItem

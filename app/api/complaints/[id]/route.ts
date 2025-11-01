@@ -7,6 +7,7 @@ import {
 } from "@/lib/server/mappers";
 import { getServerSession } from "next-auth";
 import { authOptions, ExtendedSession } from "@/lib/auth";
+import { notifyStatusChange, notifyRemark } from "@/lib/server/notifications";
 
 export async function GET(
   _: NextRequest,
@@ -16,7 +17,22 @@ export async function GET(
   const id = parseUiIdToDbId(paramId);
   if (!Number.isFinite(id))
     return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-  const complaint = await prisma.complaint.findUnique({ where: { id } });
+  const complaint = await prisma.complaint.findUnique({
+    where: { id },
+    include: {
+      user: true,
+      history: {
+        orderBy: { createdAt: "desc" },
+        include: { user: true },
+      },
+      remarks: {
+        orderBy: { createdAt: "desc" },
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
   if (!complaint)
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(mapDbComplaintToUi(complaint));
@@ -39,10 +55,33 @@ export async function PATCH(
     const id = parseUiIdToDbId(paramId);
     if (!Number.isFinite(id))
       return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+
+    const userId = parseInt(session.user.id);
     const body = await req.json();
+
+    // Get the current complaint
+    const currentComplaint = await prisma.complaint.findUnique({
+      where: { id },
+    });
+
+    if (!currentComplaint) {
+      return NextResponse.json(
+        { error: "Complaint not found" },
+        { status: 404 }
+      );
+    }
+
+    // Get user info
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
     // Translate UI fields to DB fields where needed
     const data: any = {};
+    let newStatus: string | undefined;
+    let hasStatusChange = false;
+
     if (body.status) {
       const uiStatuses = [
         "Open",
@@ -55,7 +94,9 @@ export async function PATCH(
       ] as const;
       const statusKey = uiStatuses.find((s) => s === body.status);
       if (statusKey) {
-        data.status = Mapper.statusToDB[statusKey];
+        newStatus = Mapper.statusToDB[statusKey];
+        data.status = newStatus;
+        hasStatusChange = currentComplaint.status !== newStatus;
       }
     }
     if (body.department !== undefined)
@@ -70,9 +111,81 @@ export async function PATCH(
     if (body.linkedComplaintIds !== undefined)
       data.linkedComplaintIds = body.linkedComplaintIds;
 
-    const updated = await prisma.complaint.update({ where: { id }, data });
-    // TODO: Add history rows when ComplaintHistory is extended to support UI fields
-    return NextResponse.json(mapDbComplaintToUi(updated));
+    // Update the complaint
+    await prisma.complaint.update({ where: { id }, data });
+
+    // Create history entry for status change
+    if (hasStatusChange && newStatus) {
+      await prisma.complaintHistory.create({
+        data: {
+          complaintId: id,
+          userId,
+          role: user.role as any,
+          action: `Status changed to ${body.status}`,
+          oldStatus: currentComplaint.status as any,
+          newStatus: newStatus as any,
+          notes: body.remark,
+        },
+      });
+
+      // Create notifications for status changes
+      const complaintRef = `GN-${id}`;
+      await notifyStatusChange({
+        oldStatus: currentComplaint.status,
+        newStatus,
+        complaintId: id,
+        complaintRef,
+        createdBy: userId,
+      });
+    }
+
+    // Handle remarks separately if provided
+    if (body.remark && body.remark.trim()) {
+      await prisma.remark.create({
+        data: {
+          complaintId: id,
+          userId,
+          role: user.role,
+          visibility:
+            body.remarkVisibility === "public" ? "PUBLIC" : "INTERNAL",
+          notes: body.remark,
+        },
+      });
+
+      // Create notifications for remarks
+      const complaintRef = `GN-${id}`;
+      const allowedRoles = [
+        "DISTRICT_COLLECTOR",
+        "COLLECTOR_TEAM",
+        "DEPARTMENT_TEAM",
+      ];
+
+      if (allowedRoles.includes(user.role)) {
+        await notifyRemark({
+          currentStatus: (newStatus ?? currentComplaint.status) as string,
+          complaintId: id,
+          complaintRef,
+          createdBy: userId,
+          visibility:
+            body.remarkVisibility === "public" ? "PUBLIC" : "INTERNAL",
+          taggedRoles: body.taggedRoles,
+        });
+      }
+    }
+
+    // Return fresh complaint with relations
+    const refreshed = await prisma.complaint.findUnique({
+      where: { id },
+      include: {
+        user: true,
+        history: { orderBy: { createdAt: "desc" }, include: { user: true } },
+        remarks: {
+          orderBy: { createdAt: "desc" },
+          include: { user: true },
+        },
+      },
+    });
+    return NextResponse.json(mapDbComplaintToUi(refreshed));
   } catch (error) {
     console.error("Error updating complaint:", error);
     return NextResponse.json(

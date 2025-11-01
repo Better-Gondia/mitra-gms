@@ -67,13 +67,48 @@ function DashboardContent() {
     // Handle deep linking from URL on initial load
     const params = new URLSearchParams(window.location.search);
     const complaintIdFromUrl = params.get("complaint_id");
+    const searchFromUrl = params.get("search");
+
+    // Extract complaint ID from various formats
+    let complaintId = null;
     if (complaintIdFromUrl) {
-      setUrlDeepLinkedComplaintId(complaintIdFromUrl);
+      complaintId = complaintIdFromUrl;
+    } else if (searchFromUrl) {
+      // Check if search is a pure number
+      if (/^\d+$/.test(searchFromUrl)) {
+        complaintId = searchFromUrl;
+      } else {
+        // Check if search is in new format BG-{id} (e.g., BG-1234)
+        const bgIdMatch = searchFromUrl.match(/^BG-(\d+)$/i);
+        if (bgIdMatch) {
+          complaintId = bgIdMatch[1];
+        } else {
+          // Check if search is in legacy format BG-XXXXXX-NNNN
+          const legacyMatch = searchFromUrl.match(/^BG-\d{6}-(\d+)$/i);
+          if (legacyMatch) {
+            complaintId = legacyMatch[1];
+          } else {
+            // Fallback: try to extract numeric part from last segment
+            const parts = searchFromUrl.split("-");
+            if (parts.length > 1) {
+              const lastPart = parts[parts.length - 1];
+              if (/^\d+$/.test(lastPart)) {
+                complaintId = lastPart;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (complaintId) {
+      setUrlDeepLinkedComplaintId(complaintId);
       setSelectedComplaintId(null); // Ensure side panel is closed
 
-      // Clean up the URL
+      // Clean up the URL - remove complaint_id and search
       const nextURL = new URL(window.location.href);
       nextURL.searchParams.delete("complaint_id");
+      nextURL.searchParams.delete("search");
       window.history.replaceState(
         {},
         document.title,
@@ -252,12 +287,12 @@ function DashboardContent() {
             }
           />
         )}
-
+        {/* 
         {activeView === "analytics" && (
           // features.enableRoleAndAnalyticsViews &&
 
           <AnalyticsDashboard complaints={[]} />
-        )}
+        )} */}
       </div>
     </>
   );

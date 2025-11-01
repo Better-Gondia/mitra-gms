@@ -88,6 +88,8 @@ import {
 import { MahaGovLogo } from "@/components/mahagov-logo";
 import { Combobox } from "@/components/combobox";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { SplitComplaintDialog } from "@/components/split-complaint-dialog";
+import { GitBranch, GitMerge } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -173,6 +175,28 @@ const HistoryEntry: React.FC<{
   const previewText = entry.notes?.substring(0, 120) || "";
   const needsTruncation = (entry.notes?.length || 0) > 120;
 
+  // Attempt to parse a status change target from the action string
+  const parsedStatusChange = React.useMemo(() => {
+    const actionText = entry.action || "";
+    const match = actionText.match(/Status changed to\s+(.+)/i);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+    // Common action variants
+    const known = [
+      "Open",
+      "Assigned",
+      "In Progress",
+      "Resolved",
+      "Backlog",
+      "Need Details",
+      "Invalid",
+      "Reopened",
+    ];
+    const found = known.find((k) => actionText.includes(k));
+    return found || null;
+  }, [entry.action]);
+
   return (
     <div
       key={entry.id}
@@ -230,11 +254,12 @@ const HistoryEntry: React.FC<{
                   </Avatar>
                   <div className="flex flex-col">
                     <span className="font-semibold text-sm leading-tight">
-                      {entry.user}
+                      {entry.user} (
+                      {t(entry.role.toLowerCase().replace(/ /g, "_"))})
                     </span>
-                    <span className="text-xs text-muted-foreground leading-tight">
-                      {t(entry.role.toLowerCase().replace(/ /g, "_"))}
-                    </span>
+                  </div>
+                  <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+                    <TimelineTimestamp date={entry.timestamp} />
                   </div>
                   {isStakeholderRemark && (
                     <ShieldAlert className="size-3.5 text-amber-500 ml-auto" />
@@ -287,6 +312,18 @@ const HistoryEntry: React.FC<{
         )}
 
         <div className="flex flex-wrap items-center gap-2 mt-2">
+          {parsedStatusChange && (
+            <Badge
+              variant={
+                (statusColors as any)[parsedStatusChange]
+                  ? (statusColors as any)[parsedStatusChange]
+                  : "secondary"
+              }
+              className="gap-1.5 text-xs"
+            >
+              {t("status")}: {parsedStatusChange}
+            </Badge>
+          )}
           {entry.department && (
             <Badge variant="outline" className="gap-1.5 text-xs">
               <Building className="size-3" />
@@ -531,6 +568,7 @@ export default function ComplaintDetails({
   );
   const [isSummaryLoading, setIsSummaryLoading] = React.useState(false);
   const [isLinkDialogOpen, setIsLinkDialogOpen] = React.useState(false);
+  const [isSplitDialogOpen, setIsSplitDialogOpen] = React.useState(false);
 
   const allowedToUpdateRoles: UserRole[] = [
     "District Collector",
@@ -622,6 +660,41 @@ export default function ComplaintDetails({
     toast.success(`${complaint.id} and ${targetComplaintId} are now linked.`);
   };
 
+  const handleSplitComplaint = async (splits: any[]) => {
+    try {
+      const response = await fetch(`/api/complaints/${complaint.id}/split`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ splits }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to split complaint");
+      }
+
+      const result = await response.json();
+      toast.success(
+        `Complaint split successfully into ${
+          result.displayIds?.length || splits.length
+        } complaints.`
+      );
+
+      // Refresh complaints list - this will be handled by parent component
+      // For now, just close and let parent handle refresh
+      setIsSplitDialogOpen(false);
+
+      // Trigger a refresh by calling onUpdate
+      if (onUpdate) {
+        onUpdate(complaint);
+      }
+    } catch (error: any) {
+      console.error("Error splitting complaint:", error);
+      toast.error(error.message || "Failed to split complaint");
+      throw error;
+    }
+  };
+
   const allHistory = React.useMemo(() => {
     if (!complaint) return [];
     const submissionEntry: ComplaintHistoryEntry = {
@@ -633,8 +706,21 @@ export default function ComplaintDetails({
       notes: complaint.description,
       visibility: "public",
     };
-    // Sort history chronologically (newest first)
-    return [...complaint.history, submissionEntry].sort(
+
+    const remarkEntries: ComplaintHistoryEntry[] = (
+      complaint.remarks || []
+    ).map((r) => ({
+      id: `remark-${r.id}`,
+      timestamp: r.createdAt as unknown as Date,
+      user: r.user?.name || "",
+      role: r.role as UserRole,
+      action: "Remark added",
+      notes: r.notes,
+      visibility: r.visibility,
+    }));
+
+    // Merge complaint history, remarks as history entries, and submission entry
+    return [...complaint.history, ...remarkEntries, submissionEntry].sort(
       (a, b) =>
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
@@ -731,9 +817,23 @@ export default function ComplaintDetails({
         <div className="space-y-1 flex-1 group">
           <h2 className="text-xl font-bold tracking-tight">
             {complaint.title}
+            {complaint.isSplit && (
+              <Badge variant="secondary" className="ml-2 text-xs">
+                <GitBranch className="mr-1 h-3 w-3" />
+                Split
+              </Badge>
+            )}
+            {complaint.isMerged && (
+              <Badge variant="secondary" className="ml-2 text-xs">
+                <GitMerge className="mr-1 h-3 w-3" />
+                Merged
+              </Badge>
+            )}
           </h2>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>ID: {complaint.id}</span>
+            <span className="font-mono text-sm font-semibold text-primary bg-primary/10 px-2 py-1 rounded border border-primary/20">
+              ID: {complaint.id}
+            </span>
             <Badge
               variant={statusColors[complaint.status]}
               className="capitalize"
@@ -795,9 +895,9 @@ export default function ComplaintDetails({
       <div className="hidden print:block">
         <header className="print-header">
           <div className="print-header-branding">
-            <MahaGovLogo />
+            {/* <MahaGovLogo /> */}
             <div className="print-header-title">
-              <h1>Better Gondia Mitra</h1>
+              <h1>GMS by Better Gondia</h1>
               <p>Grievance Redressal System</p>
             </div>
           </div>
@@ -963,7 +1063,7 @@ export default function ComplaintDetails({
         </div>
         <div className="print-footer">
           <p>
-            This is a computer-generated document from the Better Gondia Mitra
+            This is a computer-generated document from GMS by Better Gondia
             platform.
           </p>
         </div>
@@ -990,6 +1090,12 @@ export default function ComplaintDetails({
                   <Link2 className="mr-2 h-4 w-4" />
                   {t("link_complaint")}
                 </DropdownMenuItem>
+                {!complaint.isSplit && !complaint.isMerged && (
+                  <DropdownMenuItem onSelect={() => setIsSplitDialogOpen(true)}>
+                    <GitBranch className="mr-2 h-4 w-4" />
+                    {t("split_complaint")}
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
               </>
             )}
@@ -1008,6 +1114,15 @@ export default function ComplaintDetails({
         allComplaints={complaints}
         onLink={handleLinkComplaint}
       />
+
+      {canUpdate && !complaint.isSplit && !complaint.isMerged && (
+        <SplitComplaintDialog
+          open={isSplitDialogOpen}
+          onOpenChange={setIsSplitDialogOpen}
+          complaint={complaint}
+          onSplit={handleSplitComplaint}
+        />
+      )}
     </div>
   );
 }

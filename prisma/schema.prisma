@@ -23,8 +23,17 @@ enum Role {
   SUPERADMIN
   COLLECTOR_TEAM
   DEPARTMENT_TEAM
-  SUPERINTENDENT_OF_POLICE
-  MP_RAJYA_SABHA
+  DISTRICT_COLLECTOR
+  SUPERINTENDENT_OF_POLICE // SAME AS DISTRICT_COLLECTOR
+  MP_RAJYA_SABHA // SAME AS DISTRICT_COLLECTOR
+  MP_LOK_SABHA 
+  MLA_GONDIA
+  MLA_TIRORA
+  MLA_ARJUNI_MORGAON
+  MLA_AMGAON_DEORI
+  MLC
+  ZP_CEO
+  IFS
 }
 
 enum AuthType {
@@ -102,6 +111,18 @@ enum ComplaintPhase {
   COMPLETED
 }
 
+enum RemarkVisibility {
+  PUBLIC
+  INTERNAL
+}
+
+enum NotificationType {
+  REMARK
+  STATUS_CHANGE
+  TAG
+  ASSIGNMENT
+}
+
 /// -------------------------
 /// CORE ENTITIES
 /// -------------------------
@@ -117,6 +138,7 @@ model User {
   email    String?  @unique
   address  String?
   authType AuthType @default(DETAILS)
+  hasNotifications Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -125,6 +147,8 @@ model User {
   interactions Interaction[]
   bugs         Bug[]
   history      ComplaintHistory[]
+  remarks         Remark[]
+  createdNotifications Notification[] @relation("NotificationCreator")
 
   @@index([mobile])
   @@index([email])
@@ -158,18 +182,31 @@ model Complaint {
   coSignCount        Int      @default(0)
   reportCount        Int      @default(0)
   linkedComplaintIds String[] @default([])
+  
+  // Split and merge fields
+  displayId          String?  // For split IDs like "25-1", "25-2"
+  parentComplaintId  Int?     // Original complaint for splits
+  splitIndex         Int?     // Track split order
+  mergedIntoComplaintId Int?  // Track merged complaints
+  originalComplaintIds Int[]  @default([]) // Source complaints in merged case
+  isSplit            Boolean  @default(false)
+  isMerged           Boolean  @default(false)
+  
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   history       ComplaintHistory[]
   interactions  Interaction[]
   statusUpdates StatusUpdate[]
+  remarks       Remark[]
 
   @@index([userId])
   @@index([status])
   @@index([department])
   @@index([priority])
   @@index([category, subcategory])
+  @@index([parentComplaintId])
+  @@index([mergedIntoComplaintId])
 }
 
 model ComplaintHistory {
@@ -183,6 +220,8 @@ model ComplaintHistory {
   notes       String?
   attachment  String?
   eta         DateTime?
+  oldStatus   ComplaintStatus?
+  newStatus   ComplaintStatus?
   createdAt   DateTime  @default(now())
 
   @@index([complaintId])
@@ -202,6 +241,24 @@ model Interaction {
   createdAt    DateTime        @default(now())
 
   @@unique([userId, complaintId, type])
+}
+
+model Remark {
+  id          Int              @id @default(autoincrement())
+  complaintId Int
+  complaint   Complaint        @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  userId      Int
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        Role
+  visibility  RemarkVisibility @default(INTERNAL)
+  notes       String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([complaintId])
+  @@index([userId])
+  @@index([visibility])
+  @@index([createdAt])
 }
 
 model Bug {
@@ -241,4 +298,19 @@ model StatusUpdate {
   @@index([complaintId])
   @@index([isActive])
   @@index([createdAt])
+}
+
+model Notification {
+  id             Int              @id @default(autoincrement())
+  forRole         Role
+  type            NotificationType
+  title           String
+  message         String?
+  createdBy       Int?
+  createdByUser   User?            @relation("NotificationCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  createdAt       DateTime         @default(now())
+
+  @@index([forRole])
+  @@index([createdAt])
+  @@index([type])
 }
