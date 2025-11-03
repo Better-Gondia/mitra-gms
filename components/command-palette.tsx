@@ -33,6 +33,11 @@ const roleFaqs: Record<string, string[]> = {
     "faq_q_invalid_vs_details",
     "faq_q_find_old",
   ],
+  "Collector Team Advanced": [
+    "faq_q_process_new",
+    "faq_q_invalid_vs_details",
+    "faq_q_find_old",
+  ],
   "Department Team": [
     "faq_q_see_dept_complaints",
     "faq_q_resolve_complaint",

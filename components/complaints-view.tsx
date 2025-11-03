@@ -141,6 +141,7 @@ const REMARK_CHAR_LIMIT = 280;
 const uiRoleToDbRole: Record<string, string> = {
   "District Collector": "DISTRICT_COLLECTOR",
   "Collector Team": "COLLECTOR_TEAM",
+  "Collector Team Advanced": "COLLECTOR_TEAM_ADVANCED",
   "Department Team": "DEPARTMENT_TEAM",
   "Superintendent of Police": "SUPERINTENDENT_OF_POLICE",
   "MP Rajya Sabha": "MP_RAJYA_SABHA",
@@ -447,7 +448,7 @@ const getStatusOptionsForRole = (
   currentStatus: ComplaintStatus,
   userRole: UserRole
 ): (ComplaintStatus | "Reopen" | "Assign")[] => {
-  if (userRole === "Collector Team") {
+  if (userRole === "Collector Team" || userRole === "Collector Team Advanced") {
     if (currentStatus === "Open") return ["Assign", "Invalid", "Need Details"];
     if (currentStatus === "Need Details") return ["Open", "Assign"];
     if (["Resolved", "Invalid", "Backlog"].includes(currentStatus))
@@ -885,6 +886,7 @@ export default function ComplaintsView({
       return allStatuses;
     switch (role) {
       case "Collector Team":
+      case "Collector Team Advanced":
         return collectorStatuses;
       case "Department Team":
         return departmentStatuses;
@@ -1186,7 +1188,7 @@ export default function ComplaintsView({
     if (role === "Department Team") {
       return "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5";
     }
-    if (role === "Collector Team") {
+    if (role === "Collector Team" || role === "Collector Team Advanced") {
       return "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4";
     }
     return `grid-cols-2 sm:grid-cols-4 lg:grid-cols-8`;
@@ -1438,7 +1440,7 @@ export default function ComplaintsView({
               : 0;
 
           let description: string;
-          if (role === "Collector Team") {
+          if (role === "Collector Team" || role === "Collector Team Advanced") {
             description =
               statusKey === "all" ? t("kpi.team.total") : t(kpi.desc);
           } else if (role === "Department Team") {

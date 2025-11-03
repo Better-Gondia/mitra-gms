@@ -180,4 +180,5 @@ export const isCollectorView = (role: Role) => {
 
 export const isDepartmentView = (role: Role) => role === Role.DEPARTMENT_TEAM;
 
-export const isCollectorTeamView = (role: Role) => role === Role.COLLECTOR_TEAM;
+export const isCollectorTeamView = (role: Role) =>
+  role === Role.COLLECTOR_TEAM || role === Role.COLLECTOR_TEAM_ADVANCED;

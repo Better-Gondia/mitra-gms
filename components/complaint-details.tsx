@@ -573,6 +573,7 @@ export default function ComplaintDetails({
   const allowedToUpdateRoles: UserRole[] = [
     "District Collector",
     "Collector Team",
+    "Collector Team Advanced",
     "Department Team",
   ];
   const canUpdate = allowedToUpdateRoles.includes(role);

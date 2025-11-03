@@ -160,7 +160,12 @@ export async function GET(request: NextRequest) {
       skip: offset,
       take: limit,
       include: {
-        user: false,
+        user: {
+          select: {
+            name: true,
+            mobile: true,
+          },
+        },
         history: {
           orderBy: { createdAt: "desc" },
         },

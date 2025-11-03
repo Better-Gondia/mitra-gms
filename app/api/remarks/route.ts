@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
     // Check if user has permission to create remarks
     const allowedRoles = [
       "COLLECTOR_TEAM",
+      "COLLECTOR_TEAM_ADVANCED",
       "DEPARTMENT_TEAM",
       "DISTRICT_COLLECTOR",
     ];
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get the complaint to get its current status
+    // Get the complaint to get its current status and department
     const complaint = await prisma.complaint.findUnique({
       where: { id: complaintId },
     });
@@ -73,6 +74,15 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Extract tagged roles from notes if not provided in body (backend fallback)
+    let taggedRoles = body.taggedRoles;
+    if ((!taggedRoles || taggedRoles.length === 0) && body.notes) {
+      const { extractTaggedRolesFromText } = await import(
+        "@/lib/server/notifications"
+      );
+      taggedRoles = extractTaggedRolesFromText(body.notes) as any;
+    }
+
     // Create notification
     await notifyRemark({
       currentStatus: complaint.status,
@@ -80,7 +90,9 @@ export async function POST(req: NextRequest) {
       complaintRef,
       createdBy: userId,
       visibility: remark.visibility,
-      taggedRoles: body.taggedRoles,
+      taggedRoles: taggedRoles,
+      remarkCreatorRole: user.role,
+      complaintDepartment: complaint.department,
     });
 
     return NextResponse.json(

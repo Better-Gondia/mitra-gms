@@ -89,7 +89,7 @@ export async function POST(
       const newComplaint = await prisma.complaint.create({
         data: {
           userId: originalComplaint.userId,
-          title: split.title || originalComplaint.title,
+          title: originalComplaint.title,
           description: split.description || originalComplaint.description || "",
           status: split.status
             ? Mapper.statusToDB[split.status as keyof typeof Mapper.statusToDB]

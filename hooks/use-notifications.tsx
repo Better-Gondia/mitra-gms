@@ -25,6 +25,7 @@ export type AppNotification = {
 type NotificationContextType = {
   notifications: AppNotification[];
   unreadCount: number;
+  hasNotifications: boolean;
   markAsRead: (id: number) => void;
   markAllAsRead: () => Promise<void>;
 };
@@ -98,16 +99,23 @@ export function NotificationProvider({
   }, []);
 
   const markAllAsRead = useCallback(async () => {
+    // Immediately update local state for instant UI feedback
+    setHasNotifications(false);
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+
     try {
       await fetch("/api/notifications", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "markAsRead" }),
       });
-      setHasNotifications(false);
-    } catch {}
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  }, []);
+      // Refresh hasNotifications state from server to ensure consistency
+      await fetchRoleAndHasNotifications();
+    } catch {
+      // If API call fails, revert the optimistic update
+      await fetchRoleAndHasNotifications();
+    }
+  }, [fetchRoleAndHasNotifications]);
 
   const unreadCount = useMemo(
     () => (hasNotifications ? 1 : 0),
@@ -118,10 +126,11 @@ export function NotificationProvider({
     () => ({
       notifications,
       unreadCount,
+      hasNotifications,
       markAsRead,
       markAllAsRead,
     }),
-    [notifications, unreadCount, markAsRead, markAllAsRead]
+    [notifications, unreadCount, hasNotifications, markAsRead, markAllAsRead]
   );
 
   return (

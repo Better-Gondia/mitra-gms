@@ -87,6 +87,8 @@ import {
   Hand,
   GitBranch,
   GitMerge,
+  User,
+  Phone,
 } from "lucide-react";
 import { SplitComplaintDialog } from "@/components/split-complaint-dialog";
 import { Button } from "./ui/button";
@@ -865,6 +867,7 @@ const ExpandedRowContent: React.FC<{
   const canUpdate = [
     "District Collector",
     "Collector Team",
+    "Collector Team Advanced",
     "Department Team",
   ].includes(role);
 
@@ -889,8 +892,63 @@ const ExpandedRowContent: React.FC<{
     );
   }, [complaint]);
 
+  const isCollectorTeamAdvanced =
+    role === "Collector Team Advanced" || role === "District Collector";
+
   return (
     <div className="flex flex-col bg-muted/30">
+      {/* User Information Card - Only for Collector Team */}
+      {isCollectorTeamAdvanced &&
+        complaint.user &&
+        (complaint.user.name || complaint.user.mobile) && (
+          <>
+            <div className="p-6">
+              <Card className="border-2 border-primary/20 bg-gradient-to-br from-background to-muted/50 shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <User className="h-4 w-4 text-primary" />
+                    </div>
+                    Citizen Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {complaint.user.name && (
+                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors">
+                      <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Name
+                        </p>
+                        <p className="text-sm font-semibold text-foreground mt-0.5 truncate">
+                          {complaint.user.name}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {complaint.user.mobile && (
+                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors">
+                      <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Mobile
+                        </p>
+                        <a
+                          href={`tel:${complaint.user.mobile}`}
+                          className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors mt-0.5 block truncate"
+                        >
+                          {complaint.user.mobile}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            <Separator />
+          </>
+        )}
+
       <div className="p-6">
         <p className="text-sm text-muted-foreground">{complaint.description}</p>
       </div>
@@ -1172,6 +1230,7 @@ export default function ComplaintsTable({
   const allowedToUpdateRoles: UserRole[] = [
     "District Collector",
     "Collector Team",
+    "Collector Team Advanced",
     "Department Team",
   ];
   const canUpdate = allowedToUpdateRoles.includes(role);
@@ -1254,7 +1313,10 @@ export default function ComplaintsTable({
     currentStatus: ComplaintStatus,
     userRole: UserRole
   ): (ComplaintStatus | "Assign")[] => {
-    if (userRole === "Collector Team") {
+    if (
+      userRole === "Collector Team" ||
+      userRole === "Collector Team Advanced"
+    ) {
       if (currentStatus === "Open")
         return ["Assign", "Invalid", "Need Details"];
       if (currentStatus === "Need Details") return ["Open", "Assign"];
@@ -1280,7 +1342,9 @@ export default function ComplaintsTable({
     if (!["Resolved", "Invalid"].includes(status)) return true;
     if (
       ["Resolved", "Invalid", "Backlog"].includes(status) &&
-      (role === "Collector Team" || role === "Department Team")
+      (role === "Collector Team" ||
+        role === "Collector Team Advanced" ||
+        role === "Department Team")
     )
       return true;
 
@@ -1725,6 +1789,7 @@ export default function ComplaintsTable({
   const canMergeUpdate = [
     "District Collector",
     "Collector Team",
+    "Collector Team Advanced",
     "Department Team",
   ].includes(role);
 

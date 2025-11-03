@@ -56,6 +56,10 @@ export function MergeComplaintsDialog({
   );
   const [mergeReason, setMergeReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Cache of selected complaints to persist them regardless of search
+  const [selectedComplaintsCache, setSelectedComplaintsCache] = useState<
+    Map<string, Complaint>
+  >(new Map());
 
   // Debounce search term
   useEffect(() => {
@@ -69,7 +73,7 @@ export function MergeComplaintsDialog({
   // Determine role-based status filter
   const roleStatuses = useMemo(() => {
     if (role === "District Collector") return undefined; // Show all
-    if (role === "Collector Team") {
+    if (role === "Collector Team" || role === "Collector Team Advanced") {
       return collectorStatuses.join(",");
     }
     if (role === "Department Team") {
@@ -118,8 +122,14 @@ export function MergeComplaintsDialog({
       setSearchTerm("");
       setDebouncedSearchTerm("");
       setMergeReason("");
+      // Initialize cache with initial complaints if provided
+      const initialCache = new Map<string, Complaint>();
+      initialComplaints
+        .filter((c) => initialIds.has(c.id))
+        .forEach((c) => initialCache.set(c.id, c));
+      setSelectedComplaintsCache(initialCache);
     }
-  }, [open, selectedComplaintIds]);
+  }, [open, selectedComplaintIds, initialComplaints]);
 
   const filteredComplaints = useMemo(() => {
     let filtered = availableComplaints;
@@ -138,18 +148,27 @@ export function MergeComplaintsDialog({
 
   const toggleComplaint = (complaintId: string) => {
     const newSelected = new Set(selectedIds);
+    const newCache = new Map(selectedComplaintsCache);
+
     if (newSelected.has(complaintId)) {
       newSelected.delete(complaintId);
+      newCache.delete(complaintId);
       if (primaryId === complaintId) {
         setPrimaryId(Array.from(newSelected)[0] || null);
       }
     } else {
       newSelected.add(complaintId);
+      // Find the complaint in availableComplaints and add to cache
+      const complaint = availableComplaints.find((c) => c.id === complaintId);
+      if (complaint) {
+        newCache.set(complaintId, complaint);
+      }
       if (!primaryId) {
         setPrimaryId(complaintId);
       }
     }
     setSelectedIds(newSelected);
+    setSelectedComplaintsCache(newCache);
   };
 
   const handlePrimaryChange = (complaintId: string) => {
@@ -173,9 +192,16 @@ export function MergeComplaintsDialog({
   };
 
   const isValid = selectedIds.size >= 2 && primaryId !== null;
-  const selectedComplaintsList = availableComplaints.filter((c) =>
-    selectedIds.has(c.id)
-  );
+  // Use cached complaints instead of filtering availableComplaints
+  // This ensures selected complaints persist even when not in current search results
+  const selectedComplaintsList = Array.from(selectedComplaintsCache.values())
+    .filter((c) => selectedIds.has(c.id))
+    .sort((a, b) => {
+      // Sort by selection order (primary first, then others)
+      if (a.id === primaryId) return -1;
+      if (b.id === primaryId) return 1;
+      return 0;
+    });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

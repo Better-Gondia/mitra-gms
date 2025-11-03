@@ -1,5 +1,5 @@
 import prisma from "@/prisma/db";
-import { Role, NotificationType } from "@prisma/client";
+import { Role, NotificationType, Department } from "@prisma/client";
 
 /**
  * Creates a notification for a specific role
@@ -86,6 +86,22 @@ export async function notifyStatusChange(params: {
 }
 
 /**
+ * Maps department enum to readable name
+ */
+function getDepartmentName(department: Department | null): string {
+  if (!department) return "";
+  const deptMap: Record<Department, string> = {
+    PUBLIC_WORKS: "Public Works",
+    WATER_SUPPLY: "Water Supply",
+    SANITATION: "Sanitation",
+    HEALTH: "Health",
+    URBAN_PLANNING: "Urban Planning",
+    POLICE: "Police",
+  };
+  return deptMap[department] || "";
+}
+
+/**
  * Creates notification for a remark based on the current complaint status
  */
 export async function notifyRemark(params: {
@@ -95,6 +111,8 @@ export async function notifyRemark(params: {
   createdBy: number;
   visibility: "PUBLIC" | "INTERNAL";
   taggedRoles?: Role[];
+  remarkCreatorRole?: Role;
+  complaintDepartment?: Department | null;
 }) {
   const {
     currentStatus,
@@ -103,18 +121,60 @@ export async function notifyRemark(params: {
     createdBy,
     visibility,
     taggedRoles,
+    remarkCreatorRole,
+    complaintDepartment,
   } = params;
 
-  // Notify based on current status
-  const targetRole = getNotificationRoleForStatus(currentStatus);
-  if (targetRole) {
+  // Check if remark creator is a collector or similar stakeholder
+  const collectorRoles: Role[] = [
+    "COLLECTOR_TEAM",
+    "DISTRICT_COLLECTOR",
+    "SUPERINTENDENT_OF_POLICE",
+    "MP_RAJYA_SABHA",
+    "MP_LOK_SABHA",
+    "MLA_GONDIA",
+    "MLA_TIRORA",
+    "MLA_ARJUNI_MORGAON",
+    "MLA_AMGAON_DEORI",
+    "MLC",
+    "ZP_CEO",
+    "IFS",
+  ];
+  const isCollectorStakeholder =
+    remarkCreatorRole && collectorRoles.includes(remarkCreatorRole);
+
+  // If a collector/stakeholder leaves a remark and complaint has a department, notify DEPARTMENT_TEAM
+  if (isCollectorStakeholder && complaintDepartment) {
+    const deptName = getDepartmentName(complaintDepartment);
     await createNotification({
-      forRole: targetRole,
+      forRole: "DEPARTMENT_TEAM",
       type: "REMARK",
       title: "New remark on complaint",
-      message: `A ${visibility.toLowerCase()} remark has been added to complaint ${complaintRef}.`,
+      message: `A ${visibility.toLowerCase()} remark has been added to complaint ${complaintRef}${
+        deptName ? ` (${deptName} department)` : ""
+      }.`,
       createdBy,
     });
+  }
+
+  // Notify based on current status (existing logic)
+  const targetRole = getNotificationRoleForStatus(currentStatus);
+  if (targetRole) {
+    // Only create status-based notification if we haven't already notified DEPARTMENT_TEAM above
+    // to avoid duplicate notifications
+    const alreadyNotified =
+      isCollectorStakeholder &&
+      complaintDepartment &&
+      targetRole === "DEPARTMENT_TEAM";
+    if (!alreadyNotified) {
+      await createNotification({
+        forRole: targetRole,
+        type: "REMARK",
+        title: "New remark on complaint",
+        message: `A ${visibility.toLowerCase()} remark has been added to complaint ${complaintRef}.`,
+        createdBy,
+      });
+    }
   }
 
   // Notify tagged roles
@@ -129,4 +189,78 @@ export async function notifyRemark(params: {
       });
     }
   }
+}
+
+/**
+ * Maps role enum to readable UI name
+ */
+// function getRoleName(role: Role): string {
+//   const roleMap: Record<Role, string> = {
+//     USER: "User",
+//     ADMIN: "Admin",
+//     SUPERADMIN: "Super Admin",
+//     COLLECTOR_TEAM: "Collector Team",
+//     DEPARTMENT_TEAM: "Department Team",
+//     DISTRICT_COLLECTOR: "District Collector",
+//     SUPERINTENDENT_OF_POLICE: "Superintendent of Police",
+//     MP_RAJYA_SABHA: "MP Rajya Sabha",
+//     MP_LOK_SABHA: "MP Lok Sabha",
+//     MLA_GONDIA: "MLA Gondia",
+//     MLA_TIRORA: "MLA Tirora",
+//     MLA_ARJUNI_MORGAON: "MLA Sadak Arjuni",
+//     MLA_AMGAON_DEORI: "MLA Deori",
+//     MLC: "MLC",
+//     ZP_CEO: "Zila Parishad",
+//     IFS: "IFS",
+//   };
+//   return roleMap[role] || role;
+// }
+
+/**
+ * Extracts tagged roles from remark text (backend fallback)
+ * Matches patterns like @District Collector, @Department Team, etc.
+ */
+export function extractTaggedRolesFromText(text: string): Role[] {
+  if (!text) return [];
+
+  // Map UI role names to backend Role enum
+  const uiRoleToDbRole: Record<string, Role> = {
+    "District Collector": "DISTRICT_COLLECTOR",
+    "Collector Team": "COLLECTOR_TEAM",
+    "Department Team": "DEPARTMENT_TEAM",
+    "Superintendent of Police": "SUPERINTENDENT_OF_POLICE",
+    "MP Rajya Sabha": "MP_RAJYA_SABHA",
+    "MP Lok Sabha": "MP_LOK_SABHA",
+    "MLA Gondia": "MLA_GONDIA",
+    "MLA Tirora": "MLA_TIRORA",
+    "MLA Sadak Arjuni": "MLA_ARJUNI_MORGAON",
+    "MLA Deori": "MLA_AMGAON_DEORI",
+    MLC: "MLC",
+    "Zila Parishad": "ZP_CEO",
+  };
+
+  // Match tags like @District Collector, @Department Team, etc.
+  // More flexible pattern to handle variations
+  const tags = Array.from(text.matchAll(/@([A-Za-z][A-Za-z\s]{0,50})/g)).map(
+    (m) => m[1].trim()
+  );
+
+  const uniqueUiRoles = Array.from(new Set(tags));
+  const mapped = uniqueUiRoles
+    .map((ui) => {
+      // Try exact match first
+      if (uiRoleToDbRole[ui]) {
+        return uiRoleToDbRole[ui];
+      }
+      // Try partial match (e.g., "District Collector Sir" -> "District Collector")
+      for (const [key, value] of Object.entries(uiRoleToDbRole)) {
+        if (ui.includes(key) || key.includes(ui)) {
+          return value;
+        }
+      }
+      return null;
+    })
+    .filter((v): v is Role => v !== null);
+
+  return Array.from(new Set(mapped));
 }

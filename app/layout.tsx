@@ -133,15 +133,45 @@ function NotificationController() {
 
 function NotificationMenu() {
   const { t } = useLanguage();
-  const { notifications, unreadCount, markAsRead, markAllAsRead } =
-    useNotifications();
+  const {
+    notifications,
+    unreadCount,
+    hasNotifications,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications();
   const { role, setSelectedComplaintId, setDeepLinkedComplaintId } = useRole();
 
-  const formatNotificationMessage = (n: AppNotification): string => {
+  const formatNotificationMessage = (n: AppNotification): React.ReactNode => {
     // Extract BG-style ref first, else any number
     const refMatch = n.message?.match(/(BG-\d{6}-\d+)/i);
     const numericMatch = n.message?.match(/\b(\d{1,})\b/);
     const ref = refMatch?.[1] || numericMatch?.[1] || "";
+
+    // For TAG type, extract and highlight the role name
+    if ((n as any).type === "TAG") {
+      // Extract role from message format: "You were tagged (@District Collector) in a remark..."
+      const roleMatch = n.message?.match(/\(@([^)]+)\)/);
+      const roleName = roleMatch?.[1] || "";
+
+      // Use the actual message from backend which includes the role
+      if (roleName && n.message) {
+        // Replace the (@Role) part with highlighted version
+        const parts = n.message.split(`(@${roleName})`);
+        if (parts.length > 1) {
+          return (
+            <span>
+              {parts[0]}
+              <span className="font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                @{roleName}
+              </span>
+              {parts.slice(1).join(`(@${roleName})`)}
+            </span>
+          );
+        }
+      }
+      return n.message || t("notif_tagged_message").replace("{{ref}}", ref);
+    }
 
     switch ((n as any).type || "") {
       case "ASSIGNMENT":
@@ -156,8 +186,6 @@ function NotificationMenu() {
         );
       case "REMARK":
         return t("notif_new_remark_message").replace("{{ref}}", ref);
-      case "TAG":
-        return t("notif_tagged_message").replace("{{ref}}", ref);
       default:
         return n.message || "";
     }
@@ -180,6 +208,11 @@ function NotificationMenu() {
     }
   };
 
+  const handleBellClick = (e: React.MouseEvent) => {
+    // Mark all as read when bell is clicked
+    void markAllAsRead();
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -187,12 +220,16 @@ function NotificationMenu() {
           variant="ghost"
           size="icon"
           className="relative h-9 w-9"
-          onClick={() => {
-            void markAllAsRead();
-          }}
+          onClick={handleBellClick}
         >
-          <Bell className="h-5 w-5" />
-          {relevantUnreadCount > 0 && (
+          <Bell
+            className={cn(
+              "h-5 w-5 transition-all duration-200",
+              hasNotifications &&
+                "drop-shadow-[0_0_8px_hsl(var(--primary))] animate-pulse"
+            )}
+          />
+          {hasNotifications && (
             <span className="absolute top-0 right-0 flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -395,6 +432,7 @@ function UserMenu() {
   const dbRoleToUIRole: Record<string, string> = {
     DISTRICT_COLLECTOR: "District Collector",
     COLLECTOR_TEAM: "Collector Team",
+    COLLECTOR_TEAM_ADVANCED: "Collector Team Advanced",
     DEPARTMENT_TEAM: "Department Team",
     SUPERINTENDENT_OF_POLICE: "Superintendent of Police",
     MP_RAJYA_SABHA: "MP Rajya Sabha",

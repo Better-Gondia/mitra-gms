@@ -28,7 +28,6 @@ import { useLanguage } from "@/hooks/use-language";
 import { Checkbox } from "./ui/checkbox";
 
 interface SplitConfig {
-  title?: string;
   description?: string;
   department?: Department;
   status?: ComplaintStatus;
@@ -93,7 +92,6 @@ export function SplitComplaintDialog({
     if (checked) {
       // Fill split with original complaint data
       updateSplit(index, {
-        title: complaint.title || undefined,
         description: complaint.description || undefined,
         department: complaint.department,
         status: complaint.status,
@@ -101,7 +99,6 @@ export function SplitComplaintDialog({
     } else {
       // Clear all fields when unchecked
       updateSplit(index, {
-        title: undefined,
         description: undefined,
         department: undefined,
         status: undefined,
@@ -204,20 +201,6 @@ export function SplitComplaintDialog({
                   </div>
 
                   <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor={`split-title-${index}`}>
-                        {t("title_optional")}
-                      </Label>
-                      <Input
-                        id={`split-title-${index}`}
-                        placeholder={complaint.title || t("complaint_title")}
-                        value={split.title || ""}
-                        onChange={(e) =>
-                          updateSplit(index, { title: e.target.value })
-                        }
-                      />
-                    </div>
-
                     <div className="grid gap-2">
                       <Label htmlFor={`split-description-${index}`}>
                         {t("description")}{" "}

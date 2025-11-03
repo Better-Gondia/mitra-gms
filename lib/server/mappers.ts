@@ -82,6 +82,7 @@ const roleMapToUI: Record<DBRole, UserRole> = {
   ADMIN: "Citizen",
   SUPERADMIN: "Citizen",
   COLLECTOR_TEAM: "Collector Team",
+  COLLECTOR_TEAM_ADVANCED: "Collector Team Advanced",
   DEPARTMENT_TEAM: "Department Team",
   DISTRICT_COLLECTOR: "District Collector",
   SUPERINTENDENT_OF_POLICE: "Superintendent of Police",
@@ -129,6 +130,12 @@ export function mapDbComplaintToUi(db: any): UIComplaint {
     taluka: db.taluka ?? undefined,
     submittedDate: db.createdAt,
     lastUpdated: db.updatedAt,
+    user: db.user
+      ? {
+          name: db.user.name ?? undefined,
+          mobile: db.user.mobile ?? undefined,
+        }
+      : undefined,
     history: Array.isArray(db.history)
       ? (db.history as any[])
           .map((h) => ({

@@ -2,6 +2,7 @@ export type UserRole =
   | "SuperAdmin"
   | "Admin"
   | "Collector Team"
+  | "Collector Team Advanced"
   | "Department Team"
   | "District Collector"
   | "Citizen"
@@ -18,6 +19,7 @@ export type UserRole =
 export const userRoles = [
   "District Collector",
   "Collector Team",
+  "Collector Team Advanced",
   "Department Team",
   "Superintendent of Police",
   "MP Rajya Sabha",
@@ -166,6 +168,11 @@ export type Complaint = {
   attentionScore?: number;
   coSignCount?: number;
   type?: ComplaintType;
+  // User information (for collector team view)
+  user?: {
+    name?: string;
+    mobile?: string;
+  };
   // Split and merge fields
   displayId?: string;
   parentComplaintId?: number;

@@ -157,10 +157,25 @@ export async function PATCH(
       const allowedRoles = [
         "DISTRICT_COLLECTOR",
         "COLLECTOR_TEAM",
+        "COLLECTOR_TEAM_ADVANCED",
         "DEPARTMENT_TEAM",
       ];
 
       if (allowedRoles.includes(user.role)) {
+        // Get updated complaint to get latest department info
+        const updatedComplaint = await prisma.complaint.findUnique({
+          where: { id },
+        });
+
+        // Extract tagged roles from remark text if not provided in body (backend fallback)
+        let taggedRoles = body.taggedRoles;
+        if ((!taggedRoles || taggedRoles.length === 0) && body.remark) {
+          const { extractTaggedRolesFromText } = await import(
+            "@/lib/server/notifications"
+          );
+          taggedRoles = extractTaggedRolesFromText(body.remark) as any;
+        }
+
         await notifyRemark({
           currentStatus: (newStatus ?? currentComplaint.status) as string,
           complaintId: id,
@@ -168,7 +183,10 @@ export async function PATCH(
           createdBy: userId,
           visibility:
             body.remarkVisibility === "public" ? "PUBLIC" : "INTERNAL",
-          taggedRoles: body.taggedRoles,
+          taggedRoles: taggedRoles,
+          remarkCreatorRole: user.role,
+          complaintDepartment:
+            updatedComplaint?.department ?? currentComplaint.department,
         });
       }
     }
