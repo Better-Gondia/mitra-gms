@@ -103,6 +103,72 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
+// Utility function to highlight @tags in remark text
+function highlightTags(text: string): React.ReactNode[] {
+  if (!text) return [];
+
+  // Valid role names that can be tagged
+  const validRoles = [
+    "District Collector",
+    "Collector Team Advanced",
+    "Collector Team",
+    "Department Team",
+    "Superintendent of Police",
+    "MP Rajya Sabha",
+    "MP Lok Sabha",
+    "MLA Gondia",
+    "MLA Tirora",
+    "MLA Sadak Arjuni",
+    "MLA Deori",
+    "MLC",
+    "Zila Parishad",
+  ];
+
+  // Sort roles by length (longest first) to match longer names before shorter ones
+  // e.g., "Collector Team Advanced" before "Collector Team"
+  const sortedRoles = [...validRoles].sort((a, b) => b.length - a.length);
+
+  // Escape special regex characters in role names
+  const escapedRoles = sortedRoles.map((role) =>
+    role.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  );
+
+  // Create regex pattern: @ followed by role name, then word boundary or end
+  const rolePattern = `@(${escapedRoles.join("|")})(?=\\s|$|[.,;:!?])`;
+  const tagRegex = new RegExp(rolePattern, "gi");
+
+  const parts: (string | React.ReactElement)[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = tagRegex.exec(text)) !== null) {
+    // Add text before the tag
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index));
+    }
+
+    // Add highlighted tag
+    const tagText = match[0]; // Full match including @
+    parts.push(
+      <span
+        key={match.index}
+        className="inline-flex items-center px-1.5 py-0.5 mx-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary border border-primary/20 dark:border-primary/30"
+      >
+        {tagText}
+      </span>
+    );
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : [text];
+}
+
 interface TimelineTimestampProps {
   date: Date | string;
 }
@@ -269,14 +335,14 @@ const HistoryEntry: React.FC<{
                   )}
                 </div>
 
-                <CollapsibleContent>
+                <CollapsibleContent className="max-h-96 overflow-y-auto">
                   <p
                     className={cn(
-                      "text-sm whitespace-pre-wrap",
+                      "text-sm whitespace-pre-wrap break-words",
                       remarkTextClass
                     )}
                   >
-                    {entry.notes}
+                    {highlightTags(entry.notes || "")}
                   </p>
                 </CollapsibleContent>
 
@@ -284,7 +350,7 @@ const HistoryEntry: React.FC<{
                   <CollapsibleTrigger asChild>
                     <div className="text-sm">
                       <p className={cn("whitespace-pre-wrap", remarkTextClass)}>
-                        {previewText}
+                        {highlightTags(previewText)}
                         <button className="text-primary cursor-pointer hover:underline ml-1">
                           ... see more
                         </button>

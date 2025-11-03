@@ -116,7 +116,8 @@ export default function PaginationControls({
 
   const currentSortLabel =
     sortOptions?.find((opt) => opt.value === currentSortColumn)?.label ||
-    "Submitted Date";
+    sortOptions?.[0]?.label ||
+    "Sort";
 
   return (
     <div className="bg-card border rounded-lg shadow-sm">

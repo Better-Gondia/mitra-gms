@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import type { DateRange } from "react-day-picker";
 import type {
   Complaint,
@@ -1059,14 +1060,26 @@ export default function ComplaintsView({
     return filteredComplaints;
   }, [filteredComplaints]);
 
-  // Initialize sort based on features
+  const searchParams = useSearchParams();
+
+  // Track if we've initialized sort to prevent overriding user changes
+  const sortInitializedRef = useRef(false);
+
+  // Initialize sort based on features only once on mount
   useEffect(() => {
-    if (features.enableAIAttentionScore) {
-      updateSort({ column: "attention", direction: "descending" });
-    } else {
-      updateSort({ column: "date", direction: "descending" });
+    // Only initialize if we haven't done so yet and no explicit sort params exist in URL
+    if (!sortInitializedRef.current) {
+      // Check URL directly to see if sort params already exist
+      const urlHasSortBy = searchParams.get("sortBy");
+
+      // Only set default if no sort params exist in URL
+      if (!urlHasSortBy) {
+        updateSort({ column: "date", direction: "descending" });
+      }
+      sortInitializedRef.current = true;
     }
-  }, [role, features.enableAIAttentionScore, updateSort]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount - intentionally empty deps
 
   // Sync local search term with URL filter when it changes externally
   useEffect(() => {
@@ -1571,14 +1584,9 @@ export default function ComplaintsView({
     value: SortDescriptor["column"];
     label: string;
   }[] = [
-    { value: "attention", label: t("attention") },
     { value: "date", label: t("submitted") + " " + t("date") },
-    { value: "last_updated", label: t("last_updated") },
-    { value: "title", label: t("title") },
-    { value: "status", label: t("status") },
     { value: "id", label: t("complaint_id") },
-    { value: "category", label: t("category") },
-    { value: "subcategory", label: t("subcategory") },
+    { value: "status", label: t("status") },
   ];
 
   const currentSortLabel =
@@ -1594,12 +1602,21 @@ export default function ComplaintsView({
   };
 
   const toggleSortDirection = () => {
+    // Read current direction directly from URL to avoid stale state
+    const currentSortOrder = searchParams.get("sortOrder");
+    const currentDirection =
+      currentSortOrder === "asc" || currentSortOrder === "ascending"
+        ? "ascending"
+        : "descending";
+
+    const newDirection =
+      currentDirection === "ascending" ? "descending" : "ascending";
+    const currentSortBy =
+      searchParams.get("sortBy") || urlSortDescriptor.column;
+
     updateSort({
-      ...urlSortDescriptor,
-      direction:
-        urlSortDescriptor.direction === "ascending"
-          ? "descending"
-          : "ascending",
+      column: currentSortBy as SortDescriptor["column"],
+      direction: newDirection,
     });
   };
 
@@ -2113,12 +2130,12 @@ export default function ComplaintsView({
                 sortOptions={sortColumnOptions}
                 currentSortColumn={urlSortDescriptor.column}
                 currentSortDirection={urlSortDescriptor.direction}
-                onSortChange={(column) =>
+                onSortChange={(column) => {
                   updateSort({
-                    ...urlSortDescriptor,
                     column: column as SortDescriptor["column"],
-                  })
-                }
+                    direction: urlSortDescriptor.direction,
+                  });
+                }}
                 onSortDirectionToggle={toggleSortDirection}
               />
 

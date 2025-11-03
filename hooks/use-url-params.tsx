@@ -81,6 +81,15 @@ export function useURLParams() {
       linkedFilter: searchParams.get("linked") === "true",
     };
 
+    const sortOrderParam = searchParams.get("sortOrder");
+    // Handle both "asc"/"desc" and "ascending"/"descending" formats
+    let sortDirection: "ascending" | "descending" = defaultSort.direction;
+    if (sortOrderParam === "asc" || sortOrderParam === "ascending") {
+      sortDirection = "ascending";
+    } else if (sortOrderParam === "desc" || sortOrderParam === "descending") {
+      sortDirection = "descending";
+    }
+
     const sortDescriptor: SortDescriptor = {
       column:
         (searchParams.get("sortBy") as
@@ -89,9 +98,7 @@ export function useURLParams() {
           | "details"
           | "last_updated"
           | "attention") || defaultSort.column,
-      direction:
-        (searchParams.get("sortOrder") as "ascending" | "descending") ||
-        defaultSort.direction,
+      direction: sortDirection,
     };
 
     const pagination: PaginationState = {
@@ -192,21 +199,15 @@ export function useURLParams() {
         }
       }
 
-      // Update sorting
+      // Update sorting - always set the values to ensure they're in the URL
       if (updates.sortDescriptor) {
         const { sortDescriptor } = updates;
 
-        if (sortDescriptor.column !== defaultSort.column) {
-          current.set("sortBy", sortDescriptor.column);
-        } else {
-          current.delete("sortBy");
-        }
-
-        if (sortDescriptor.direction !== defaultSort.direction) {
-          current.set("sortOrder", sortDescriptor.direction);
-        } else {
-          current.delete("sortOrder");
-        }
+        // Always set sortBy to ensure it's in the URL
+        current.set("sortBy", sortDescriptor.column);
+        //
+        // Always set sortOrder to ensure it's in the URL
+        current.set("sortOrder", sortDescriptor.direction);
       }
 
       // Update pagination

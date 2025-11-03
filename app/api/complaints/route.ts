@@ -28,7 +28,12 @@ export async function GET(request: NextRequest) {
 
     // Sorting parameters
     const sortBy = searchParams.get("sortBy") || "id";
-    const sortOrder = searchParams.get("sortOrder") || "desc";
+    const sortOrderParam = searchParams.get("sortOrder") || "desc";
+    // Normalize sortOrder: handle both "asc"/"desc" and "ascending"/"descending"
+    const sortOrder =
+      sortOrderParam === "asc" || sortOrderParam === "ascending"
+        ? "asc"
+        : "desc";
 
     // Build where clause
     const where: any = {};
@@ -122,9 +127,9 @@ export async function GET(request: NextRequest) {
     if (sortBy === "attention") {
       // For now, fallback to updatedAt since attention score isn't in DB yet
       orderBy.updatedAt = sortOrder;
-    } else if (sortBy === "date") {
+    } else if (sortBy === "date" || sortBy === "createdAt") {
       orderBy.createdAt = sortOrder;
-    } else if (sortBy === "last_updated") {
+    } else if (sortBy === "last_updated" || sortBy === "updatedAt") {
       orderBy.updatedAt = sortOrder;
     } else if (sortBy === "title") {
       orderBy.title = sortOrder;

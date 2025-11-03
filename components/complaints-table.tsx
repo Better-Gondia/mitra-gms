@@ -166,6 +166,72 @@ import { MergeComplaintsDialog } from "@/components/merge-complaints-dialog";
 
 const REMARK_CHAR_LIMIT = 280;
 
+// Utility function to highlight @tags in remark text
+function highlightTagsInRemark(text: string): React.ReactNode[] {
+  if (!text) return [];
+
+  // Valid role names that can be tagged
+  const validRoles = [
+    "District Collector",
+    "Collector Team Advanced",
+    "Collector Team",
+    "Department Team",
+    "Superintendent of Police",
+    "MP Rajya Sabha",
+    "MP Lok Sabha",
+    "MLA Gondia",
+    "MLA Tirora",
+    "MLA Sadak Arjuni",
+    "MLA Deori",
+    "MLC",
+    "Zila Parishad",
+  ];
+
+  // Sort roles by length (longest first) to match longer names before shorter ones
+  // e.g., "Collector Team Advanced" before "Collector Team"
+  const sortedRoles = [...validRoles].sort((a, b) => b.length - a.length);
+
+  // Escape special regex characters in role names
+  const escapedRoles = sortedRoles.map((role) =>
+    role.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  );
+
+  // Create regex pattern: @ followed by role name, then word boundary or end
+  const rolePattern = `@(${escapedRoles.join("|")})(?=\\s|$|[.,;:!?])`;
+  const tagRegex = new RegExp(rolePattern, "gi");
+
+  const parts: (string | React.ReactElement)[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = tagRegex.exec(text)) !== null) {
+    // Add text before the tag
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index));
+    }
+
+    // Add highlighted tag
+    const tagText = match[0]; // Full match including @
+    parts.push(
+      <span
+        key={match.index}
+        className="inline-flex items-center px-1.5 py-0.5 mx-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary border border-primary/20 dark:border-primary/30"
+      >
+        {tagText}
+      </span>
+    );
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : [text];
+}
+
 const HorizontalTimeline: React.FC<{ complaint: Complaint }> = ({
   complaint,
 }) => {
@@ -441,7 +507,7 @@ const HorizontalTimeline: React.FC<{ complaint: Complaint }> = ({
                           </p>
                           {entry.notes && (
                             <p className="text-sm text-muted-foreground mt-1 line-clamp-3">
-                              {entry.notes}
+                              {highlightTagsInRemark(entry.notes)}
                             </p>
                           )}
                         </TooltipContent>
@@ -761,12 +827,12 @@ const RemarkCard: React.FC<{
   return (
     <Card
       className={cn(
-        "transition-all flex flex-col flex-shrink-0 h-32",
+        "transition-all flex flex-col flex-shrink-0 min-h-32 max-h-64",
         isStakeholderRemark && "border-amber-500/50"
       )}
     >
-      <CardContent className="p-3 flex-1 flex flex-col">
-        <div className="flex items-center justify-between mb-2">
+      <CardContent className="p-3 flex-1 flex flex-col min-h-0">
+        <div className="flex items-center justify-between mb-2 flex-shrink-0">
           <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6 text-xs">
               <AvatarImage
@@ -820,10 +886,12 @@ const RemarkCard: React.FC<{
           </div>
         </div>
 
-        <ScrollArea className="flex-1 pr-2">
-          <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-            {entry.notes}
-          </p>
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="pr-4">
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
+              {highlightTagsInRemark(entry.notes || "")}
+            </p>
+          </div>
         </ScrollArea>
 
         {entry.attachment && (
