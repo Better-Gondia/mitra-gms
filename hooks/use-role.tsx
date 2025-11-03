@@ -32,6 +32,7 @@ const dbRoleToUIRole: Record<DBRole, UserRole> = {
   ADMIN: "Admin",
   SUPERADMIN: "SuperAdmin",
   COLLECTOR_TEAM: "Collector Team",
+  COLLECTOR_TEAM_ADVANCED: "Collector Team Advanced",
   DEPARTMENT_TEAM: "Department Team",
   DISTRICT_COLLECTOR: "District Collector",
   SUPERINTENDENT_OF_POLICE: "Superintendent of Police",
