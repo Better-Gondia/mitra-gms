@@ -23,9 +23,15 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const unreadOnly = searchParams.get("unreadOnly") === "true";
 
+    // Collectors Team Advanced should receive notifications for both COLLECTOR_TEAM and COLLECTOR_TEAM_ADVANCED
+    const rolesToFetch =
+      user.role === "COLLECTOR_TEAM_ADVANCED"
+        ? ["COLLECTOR_TEAM", "COLLECTOR_TEAM_ADVANCED"]
+        : [user.role];
+
     const notifications = await prisma.notification.findMany({
       where: {
-        forRole: user.role as any,
+        forRole: { in: rolesToFetch } as any,
       },
       include: {
         createdByUser: {

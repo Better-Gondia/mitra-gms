@@ -22,11 +22,32 @@ export async function createNotification(params: {
       },
     });
 
+    // If notification is for COLLECTOR_TEAM, also create one for COLLECTOR_TEAM_ADVANCED
+    if (params.forRole === "COLLECTOR_TEAM") {
+      await prisma.notification.create({
+        data: {
+          forRole: "COLLECTOR_TEAM_ADVANCED",
+          type: params.type,
+          title: params.title,
+          message: params.message,
+          createdBy: params.createdBy,
+        },
+      });
+    }
+
     // Update hasNotifications flag for all users with the target role
     await prisma.user.updateMany({
       where: { role: params.forRole },
       data: { hasNotifications: true },
     });
+
+    // Also update hasNotifications for COLLECTOR_TEAM_ADVANCED if notifying COLLECTOR_TEAM
+    if (params.forRole === "COLLECTOR_TEAM") {
+      await prisma.user.updateMany({
+        where: { role: "COLLECTOR_TEAM_ADVANCED" },
+        data: { hasNotifications: true },
+      });
+    }
   } catch (error) {
     console.error("Error creating notification:", error);
   }
@@ -128,6 +149,7 @@ export async function notifyRemark(params: {
   // Check if remark creator is a collector or similar stakeholder
   const collectorRoles: Role[] = [
     "COLLECTOR_TEAM",
+    "COLLECTOR_TEAM_ADVANCED",
     "DISTRICT_COLLECTOR",
     "SUPERINTENDENT_OF_POLICE",
     "MP_RAJYA_SABHA",
@@ -227,6 +249,7 @@ export function extractTaggedRolesFromText(text: string): Role[] {
   const uiRoleToDbRole: Record<string, Role> = {
     "District Collector": "DISTRICT_COLLECTOR",
     "Collector Team": "COLLECTOR_TEAM",
+    "Collector Team Advanced": "COLLECTOR_TEAM_ADVANCED",
     "Department Team": "DEPARTMENT_TEAM",
     "Superintendent of Police": "SUPERINTENDENT_OF_POLICE",
     "MP Rajya Sabha": "MP_RAJYA_SABHA",

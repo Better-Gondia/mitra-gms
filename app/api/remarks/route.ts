@@ -151,6 +151,7 @@ export async function GET(req: NextRequest) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     const isInternal = [
       "COLLECTOR_TEAM",
+      "COLLECTOR_TEAM_ADVANCED",
       "DEPARTMENT_TEAM",
       "DISTRICT_COLLECTOR",
     ].includes(user?.role || "");

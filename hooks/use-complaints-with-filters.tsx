@@ -56,7 +56,10 @@ export function useComplaintsWithFilters({
     if (!filters.statusFilter || filters.statusFilter === "all") {
       if (role === "Department Team") {
         params.statuses = "Assigned,In Progress,Resolved,Backlog";
-      } else if (role === "Collector Team") {
+      } else if (
+        role === "Collector Team" ||
+        role === "Collector Team Advanced"
+      ) {
         params.statuses = "Open,Need Details,Invalid";
       }
     }
@@ -92,7 +95,7 @@ export function useComplaintsWithFilters({
       ) {
         return true;
       }
-      if (role === "Collector Team") {
+      if (role === "Collector Team" || role === "Collector Team Advanced") {
         return ["Open", "Need Details", "Invalid"].includes(complaint.status);
       }
       if (role === "Department Team") {
@@ -198,7 +201,7 @@ export function useComplaintsWithFilters({
       ) {
         return true;
       }
-      if (role === "Collector Team") {
+      if (role === "Collector Team" || role === "Collector Team Advanced") {
         return ["Open", "Need Details", "Invalid"].includes(complaint.status);
       }
       if (role === "Department Team") {

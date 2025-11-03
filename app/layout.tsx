@@ -222,16 +222,9 @@ function NotificationMenu() {
           className="relative h-9 w-9"
           onClick={handleBellClick}
         >
-          <Bell
-            className={cn(
-              "h-5 w-5 transition-all duration-200",
-              hasNotifications &&
-                "drop-shadow-[0_0_8px_hsl(var(--primary))] animate-pulse"
-            )}
-          />
+          <Bell className="h-5 w-5" />
           {hasNotifications && (
             <span className="absolute top-0 right-0 flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
           )}
