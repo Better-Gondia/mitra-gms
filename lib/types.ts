@@ -49,6 +49,23 @@ export const departments = [
   "Health",
   "Urban Planning",
   "Police",
+  "PWD 1",
+  "PWD 2",
+  "RTO",
+  "Zilla Parishad",
+  "SP Office Gondia",
+  "Supply Department",
+  "Health Department",
+  "MSEB Gondia",
+  "Traffic Police",
+  "Nagar Parishad Tirora",
+  "Nagar Parishad Gondia",
+  "Nagar Parishad Amgaon",
+  "Nagar Parishad Goregaon",
+  "Dean Medical College Gondia",
+  "Forest Office Gondia",
+  "Samaj Kalyan Office Gondia",
+  "SLR Office Gondia",
 ] as const;
 export type Department = (typeof departments)[number];
 

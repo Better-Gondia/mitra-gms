@@ -23,7 +23,6 @@ enum Role {
   SUPERADMIN
   COLLECTOR_TEAM
   COLLECTOR_TEAM_ADVANCED
-  DEPARTMENT_TEAM
   DISTRICT_COLLECTOR
   SUPERINTENDENT_OF_POLICE // SAME AS DISTRICT_COLLECTOR
   MP_RAJYA_SABHA // SAME AS DISTRICT_COLLECTOR
@@ -35,6 +34,28 @@ enum Role {
   MLC
   ZP_CEO
   IFS
+
+// Department Roles
+  DEPARTMENT_TEAM
+  PWD_1 // no1	gondiapwd@gmail.com
+  PWD_2 // no2	gondiapwd2@gmail.com
+  RTO 	// gondiartooffice@gmail.com
+  ZILLA_PARISHAD 	// gondiazillaparishad@gmail.com
+  SP_OFFICE_GONDIA //	gondiaspoffice@gmail.com
+  SUPPLY_DEPARTMENT //	gondiadistrictsupplyoffice@gmail.com
+  HEALTH_DEPARTMENT // 	districthealthofficezillaparis@gmail.com
+  MSEB_GONDIA // 	gondiamsedcloffice@gmail.com
+  TRAFFIC_POLICE // 	gondiatrafficpolice@gmail.com
+  NAGAR_PARISHAD_TIRORA //	co.tiroda@gmail.com
+  NAGAR_PARISHAD_GONDIA //	co.gondia1@gmail.com
+  NAGAR_PARISHAD_AMGAON //	co.amgaon@gmail.com
+  NAGAR_PARISHAD_GOREGAON	// co.goregaon1@gmail.com
+  DEAN_MEDICAL_COLLEGE_GONDIA //	gondiadeanmedicalcollege@gmail.com
+  FOREST_OFFICE_GONDIA //	gondiaforestoffice@gmail.com
+  SAMAJ_KALYAN_OFFICE_GONDIA //	gondiasamajkalyan@gmail.com
+  SLR_OFFICE_GONDIA //	gondialandrecordsuprident@gmail.com
+
+  // Collector office 	gondiaresidentdeputycollector@gmail.com
 }
 
 enum AuthType {
@@ -64,6 +85,24 @@ enum Department {
   HEALTH
   URBAN_PLANNING
   POLICE
+
+  PWD_1 // no1	gondiapwd@gmail.com
+  PWD_2 // no2	gondiapwd2@gmail.com
+  RTO 	// gondiartooffice@gmail.com
+  ZILLA_PARISHAD 	// gondiazillaparishad@gmail.com
+  SP_OFFICE_GONDIA //	gondiaspoffice@gmail.com
+  SUPPLY_DEPARTMENT //	gondiadistrictsupplyoffice@gmail.com
+  HEALTH_DEPARTMENT // 	districthealthofficezillaparis@gmail.com
+  MSEB_GONDIA // 	gondiamsedcloffice@gmail.com
+  TRAFFIC_POLICE // 	gondiatrafficpolice@gmail.com
+  NAGAR_PARISHAD_TIRORA //	co.tiroda@gmail.com
+  NAGAR_PARISHAD_GONDIA //	co.gondia1@gmail.com
+  NAGAR_PARISHAD_AMGAON //	co.amgaon@gmail.com
+  NAGAR_PARISHAD_GOREGAON	// co.goregaon1@gmail.com
+  DEAN_MEDICAL_COLLEGE_GONDIA //	gondiadeanmedicalcollege@gmail.com
+  FOREST_OFFICE_GONDIA //	gondiaforestoffice@gmail.com
+  SAMAJ_KALYAN_OFFICE_GONDIA //	gondiasamajkalyan@gmail.com
+  SLR_OFFICE_GONDIA //	gondialandrecordsuprident@gmail.com
 }
 
 enum Language {

@@ -3,9 +3,15 @@ import prisma from "@/prisma/db";
 import { mapDbComplaintToUi, Mapper } from "@/lib/server/mappers";
 import { getServerSession } from "next-auth";
 import { authOptions, ExtendedSession } from "@/lib/auth";
+import { isDepartmentRole, getDepartmentFromRole } from "@/lib/utils";
+import { Role } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   try {
+    const session = (await getServerSession(
+      authOptions
+    )) as ExtendedSession | null;
+    
     const { searchParams } = new URL(request.url);
 
     // Pagination parameters
@@ -96,7 +102,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Department filter
-    if (department && department !== "all") {
+    // If user has a department role, automatically filter by that department
+    // unless an explicit department filter is provided
+    const userRole = (session?.user as any)?.role as Role | undefined;
+    if (userRole && isDepartmentRole(userRole)) {
+      const roleDepartment = getDepartmentFromRole(userRole);
+      if (roleDepartment) {
+        // User has a specific department role, filter by that department
+        where.department = roleDepartment as any;
+      }
+    } else if (department && department !== "all") {
+      // Explicit department filter from query params (for non-department roles or when overriding)
       const dbDept = Mapper.deptToDB(department as any);
       if (dbDept) {
         where.department = dbDept;

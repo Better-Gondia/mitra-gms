@@ -35,11 +35,30 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user has permission to create remarks
+    // Include all department roles (they are treated the same as DEPARTMENT_TEAM)
     const allowedRoles = [
       "COLLECTOR_TEAM",
       "COLLECTOR_TEAM_ADVANCED",
       "DEPARTMENT_TEAM",
       "DISTRICT_COLLECTOR",
+      // All department roles
+      "PWD_1",
+      "PWD_2",
+      "RTO",
+      "ZILLA_PARISHAD",
+      "SP_OFFICE_GONDIA",
+      "SUPPLY_DEPARTMENT",
+      "HEALTH_DEPARTMENT",
+      "MSEB_GONDIA",
+      "TRAFFIC_POLICE",
+      "NAGAR_PARISHAD_TIRORA",
+      "NAGAR_PARISHAD_GONDIA",
+      "NAGAR_PARISHAD_AMGAON",
+      "NAGAR_PARISHAD_GOREGAON",
+      "DEAN_MEDICAL_COLLEGE_GONDIA",
+      "FOREST_OFFICE_GONDIA",
+      "SAMAJ_KALYAN_OFFICE_GONDIA",
+      "SLR_OFFICE_GONDIA",
     ];
     if (!allowedRoles.includes(user.role)) {
       return NextResponse.json(
@@ -147,6 +166,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Get user's role for filtering visibility
+    // Include all department roles (they are treated the same as DEPARTMENT_TEAM)
     const userId = parseInt(session.user.id);
     const user = await prisma.user.findUnique({ where: { id: userId } });
     const isInternal = [
@@ -154,6 +174,24 @@ export async function GET(req: NextRequest) {
       "COLLECTOR_TEAM_ADVANCED",
       "DEPARTMENT_TEAM",
       "DISTRICT_COLLECTOR",
+      // All department roles
+      "PWD_1",
+      "PWD_2",
+      "RTO",
+      "ZILLA_PARISHAD",
+      "SP_OFFICE_GONDIA",
+      "SUPPLY_DEPARTMENT",
+      "HEALTH_DEPARTMENT",
+      "MSEB_GONDIA",
+      "TRAFFIC_POLICE",
+      "NAGAR_PARISHAD_TIRORA",
+      "NAGAR_PARISHAD_GONDIA",
+      "NAGAR_PARISHAD_AMGAON",
+      "NAGAR_PARISHAD_GOREGAON",
+      "DEAN_MEDICAL_COLLEGE_GONDIA",
+      "FOREST_OFFICE_GONDIA",
+      "SAMAJ_KALYAN_OFFICE_GONDIA",
+      "SLR_OFFICE_GONDIA",
     ].includes(user?.role || "");
 
     const remarks = await prisma.remark.findMany({

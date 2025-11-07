@@ -154,11 +154,30 @@ export async function PATCH(
 
       // Create notifications for remarks
       const complaintRef = `GN-${id}`;
+      // Include all department roles (they are treated the same as DEPARTMENT_TEAM)
       const allowedRoles = [
         "DISTRICT_COLLECTOR",
         "COLLECTOR_TEAM",
         "COLLECTOR_TEAM_ADVANCED",
         "DEPARTMENT_TEAM",
+        // All department roles
+        "PWD_1",
+        "PWD_2",
+        "RTO",
+        "ZILLA_PARISHAD",
+        "SP_OFFICE_GONDIA",
+        "SUPPLY_DEPARTMENT",
+        "HEALTH_DEPARTMENT",
+        "MSEB_GONDIA",
+        "TRAFFIC_POLICE",
+        "NAGAR_PARISHAD_TIRORA",
+        "NAGAR_PARISHAD_GONDIA",
+        "NAGAR_PARISHAD_AMGAON",
+        "NAGAR_PARISHAD_GOREGAON",
+        "DEAN_MEDICAL_COLLEGE_GONDIA",
+        "FOREST_OFFICE_GONDIA",
+        "SAMAJ_KALYAN_OFFICE_GONDIA",
+        "SLR_OFFICE_GONDIA",
       ];
 
       if (allowedRoles.includes(user.role)) {

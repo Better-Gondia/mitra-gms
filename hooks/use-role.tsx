@@ -45,6 +45,24 @@ const dbRoleToUIRole: Record<DBRole, UserRole> = {
   MLC: "MLC",
   IFS: "Citizen",
   ZP_CEO: "Zila Parishad",
+  // All department roles map to "Department Team"
+  PWD_1: "Department Team",
+  PWD_2: "Department Team",
+  RTO: "Department Team",
+  ZILLA_PARISHAD: "Department Team",
+  SP_OFFICE_GONDIA: "Department Team",
+  SUPPLY_DEPARTMENT: "Department Team",
+  HEALTH_DEPARTMENT: "Department Team",
+  MSEB_GONDIA: "Department Team",
+  TRAFFIC_POLICE: "Department Team",
+  NAGAR_PARISHAD_TIRORA: "Department Team",
+  NAGAR_PARISHAD_GONDIA: "Department Team",
+  NAGAR_PARISHAD_AMGAON: "Department Team",
+  NAGAR_PARISHAD_GOREGAON: "Department Team",
+  DEAN_MEDICAL_COLLEGE_GONDIA: "Department Team",
+  FOREST_OFFICE_GONDIA: "Department Team",
+  SAMAJ_KALYAN_OFFICE_GONDIA: "Department Team",
+  SLR_OFFICE_GONDIA: "Department Team",
 };
 
 export function RoleProvider({ children }: { children: React.ReactNode }) {

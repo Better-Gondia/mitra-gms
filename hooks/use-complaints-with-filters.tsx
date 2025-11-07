@@ -53,6 +53,7 @@ export function useComplaintsWithFilters({
       params.status = filters.statusFilter;
     }
     // Role-based status scoping when no explicit status filter is set
+    // All department roles (mapped to "Department Team" in UI) should see department statuses
     if (!filters.statusFilter || filters.statusFilter === "all") {
       if (role === "Department Team") {
         params.statuses = "Assigned,In Progress,Resolved,Backlog";
@@ -63,6 +64,7 @@ export function useComplaintsWithFilters({
         params.statuses = "Open,Need Details,Invalid";
       }
     }
+    // Note: Department filtering by role is handled server-side in app/api/complaints/route.ts
     if (filters.departmentFilter && filters.departmentFilter !== "all") {
       params.department = filters.departmentFilter;
     }

@@ -47,6 +47,42 @@ const deptMapToUI = (
       return "Urban Planning";
     case "POLICE":
       return "Police";
+    case "PWD_1":
+      return "PWD 1";
+    case "PWD_2":
+      return "PWD 2";
+    case "RTO":
+      return "RTO";
+    case "ZILLA_PARISHAD":
+      return "Zilla Parishad";
+    case "SP_OFFICE_GONDIA":
+      return "SP Office Gondia";
+    case "SUPPLY_DEPARTMENT":
+      return "Supply Department";
+    case "HEALTH_DEPARTMENT":
+      return "Health Department";
+    case "MSEB_GONDIA":
+      return "MSEB Gondia";
+    case "TRAFFIC_POLICE":
+      return "Traffic Police";
+    case "NAGAR_PARISHAD_TIRORA":
+      return "Nagar Parishad Tirora";
+    case "NAGAR_PARISHAD_GONDIA":
+      return "Nagar Parishad Gondia";
+    case "NAGAR_PARISHAD_AMGAON":
+      return "Nagar Parishad Amgaon";
+    case "NAGAR_PARISHAD_GOREGAON":
+      return "Nagar Parishad Goregaon";
+    case "DEAN_MEDICAL_COLLEGE_GONDIA":
+      return "Dean Medical College Gondia";
+    case "FOREST_OFFICE_GONDIA":
+      return "Forest Office Gondia";
+    case "SAMAJ_KALYAN_OFFICE_GONDIA":
+      return "Samaj Kalyan Office Gondia";
+    case "SLR_OFFICE_GONDIA":
+      return "SLR Office Gondia";
+    default:
+      return undefined;
   }
 };
 
@@ -66,6 +102,40 @@ const deptMapToDB = (
       return "URBAN_PLANNING";
     case "Police":
       return "POLICE";
+    case "PWD 1":
+      return "PWD_1";
+    case "PWD 2":
+      return "PWD_2";
+    case "RTO":
+      return "RTO";
+    case "Zilla Parishad":
+      return "ZILLA_PARISHAD";
+    case "SP Office Gondia":
+      return "SP_OFFICE_GONDIA";
+    case "Supply Department":
+      return "SUPPLY_DEPARTMENT";
+    case "Health Department":
+      return "HEALTH_DEPARTMENT";
+    case "MSEB Gondia":
+      return "MSEB_GONDIA";
+    case "Traffic Police":
+      return "TRAFFIC_POLICE";
+    case "Nagar Parishad Tirora":
+      return "NAGAR_PARISHAD_TIRORA";
+    case "Nagar Parishad Gondia":
+      return "NAGAR_PARISHAD_GONDIA";
+    case "Nagar Parishad Amgaon":
+      return "NAGAR_PARISHAD_AMGAON";
+    case "Nagar Parishad Goregaon":
+      return "NAGAR_PARISHAD_GOREGAON";
+    case "Dean Medical College Gondia":
+      return "DEAN_MEDICAL_COLLEGE_GONDIA";
+    case "Forest Office Gondia":
+      return "FOREST_OFFICE_GONDIA";
+    case "Samaj Kalyan Office Gondia":
+      return "SAMAJ_KALYAN_OFFICE_GONDIA";
+    case "SLR Office Gondia":
+      return "SLR_OFFICE_GONDIA";
     default:
       return null;
   }
@@ -95,6 +165,24 @@ const roleMapToUI: Record<DBRole, UserRole> = {
   MLC: "MLC",
   IFS: "Citizen",
   ZP_CEO: "Zila Parishad",
+  // All department roles map to "Department Team"
+  PWD_1: "Department Team",
+  PWD_2: "Department Team",
+  RTO: "Department Team",
+  ZILLA_PARISHAD: "Department Team",
+  SP_OFFICE_GONDIA: "Department Team",
+  SUPPLY_DEPARTMENT: "Department Team",
+  HEALTH_DEPARTMENT: "Department Team",
+  MSEB_GONDIA: "Department Team",
+  TRAFFIC_POLICE: "Department Team",
+  NAGAR_PARISHAD_TIRORA: "Department Team",
+  NAGAR_PARISHAD_GONDIA: "Department Team",
+  NAGAR_PARISHAD_AMGAON: "Department Team",
+  NAGAR_PARISHAD_GOREGAON: "Department Team",
+  DEAN_MEDICAL_COLLEGE_GONDIA: "Department Team",
+  FOREST_OFFICE_GONDIA: "Department Team",
+  SAMAJ_KALYAN_OFFICE_GONDIA: "Department Team",
+  SLR_OFFICE_GONDIA: "Department Team",
 };
 
 function generateComplaintIdFromDate(

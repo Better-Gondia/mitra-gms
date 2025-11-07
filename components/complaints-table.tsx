@@ -2027,7 +2027,13 @@ export default function ComplaintsTable({
                             </Badge>
                           </button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-96 p-0" align="end">
+                        <PopoverContent
+                          className="w-96 p-0"
+                          align="end"
+                          side="bottom"
+                          onOpenAutoFocus={(e) => e.preventDefault()}
+                          avoidCollisions={false}
+                        >
                           <div className="p-4">
                             <h4 className="font-medium text-lg mb-4">
                               {t("update_status_desc")}

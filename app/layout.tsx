@@ -351,6 +351,48 @@ function LanguageSwitcher() {
   );
 }
 
+// Shared role mapping function
+const getRoleDisplayName = (dbRole: string | undefined): string => {
+  const dbRoleToUIRole: Record<string, string> = {
+    DISTRICT_COLLECTOR: "District Collector",
+    COLLECTOR_TEAM: "Collector Team",
+    COLLECTOR_TEAM_ADVANCED: "Collector Team Advanced",
+    DEPARTMENT_TEAM: "Department Team",
+    SUPERINTENDENT_OF_POLICE: "Superintendent of Police",
+    MP_RAJYA_SABHA: "MP Rajya Sabha",
+    MP_LOK_SABHA: "MP Lok Sabha",
+    MLA_GONDIA: "MLA Gondia",
+    MLA_TIRORA: "MLA Tirora",
+    MLA_ARJUNI_MORGAON: "MLA Sadak Arjuni",
+    MLA_AMGAON_DEORI: "MLA Deori",
+    MLC: "MLC",
+    ZP_CEO: "Zila Parishad",
+    USER: "Citizen",
+    ADMIN: "Citizen",
+    SUPERADMIN: "Citizen",
+    IFS: "Citizen",
+    // Department roles - display actual department names
+    PWD_1: "PWD 1",
+    PWD_2: "PWD 2",
+    RTO: "RTO",
+    ZILLA_PARISHAD: "Zilla Parishad",
+    SP_OFFICE_GONDIA: "SP Office Gondia",
+    SUPPLY_DEPARTMENT: "Supply Department",
+    HEALTH_DEPARTMENT: "Health Department",
+    MSEB_GONDIA: "MSEB Gondia",
+    TRAFFIC_POLICE: "Traffic Police",
+    NAGAR_PARISHAD_TIRORA: "Nagar Parishad Tirora",
+    NAGAR_PARISHAD_GONDIA: "Nagar Parishad Gondia",
+    NAGAR_PARISHAD_AMGAON: "Nagar Parishad Amgaon",
+    NAGAR_PARISHAD_GOREGAON: "Nagar Parishad Goregaon",
+    DEAN_MEDICAL_COLLEGE_GONDIA: "Dean Medical College Gondia",
+    FOREST_OFFICE_GONDIA: "Forest Office Gondia",
+    SAMAJ_KALYAN_OFFICE_GONDIA: "Samaj Kalyan Office Gondia",
+    SLR_OFFICE_GONDIA: "SLR Office Gondia",
+  };
+  return dbRoleToUIRole[dbRole || "USER"] || "Citizen";
+};
+
 // function RoleSwitcher() {
 //   const { role, setRole, t } = useRole();
 //   const { features } = useAdvancedFeatures();
@@ -421,31 +463,10 @@ function UserMenu() {
       .slice(0, 2);
   };
 
-  // Map database role enum to UI role string
-  const dbRoleToUIRole: Record<string, string> = {
-    DISTRICT_COLLECTOR: "District Collector",
-    COLLECTOR_TEAM: "Collector Team",
-    COLLECTOR_TEAM_ADVANCED: "Collector Team Advanced",
-    DEPARTMENT_TEAM: "Department Team",
-    SUPERINTENDENT_OF_POLICE: "Superintendent of Police",
-    MP_RAJYA_SABHA: "MP Rajya Sabha",
-    MP_LOK_SABHA: "MP Lok Sabha",
-    MLA_GONDIA: "MLA Gondia",
-    MLA_TIRORA: "MLA Tirora",
-    MLA_ARJUNI_MORGAON: "MLA Sadak Arjuni",
-    MLA_AMGAON_DEORI: "MLA Deori",
-    MLC: "MLC",
-    ZP_CEO: "Zila Parishad",
-    USER: "Citizen",
-    ADMIN: "Citizen",
-    SUPERADMIN: "Citizen",
-    IFS: "Citizen",
-  };
-
   const getUserRoleDisplay = () => {
     const dbRole = (session?.user as any)?.role || "USER";
-    const uiRole = dbRoleToUIRole[dbRole] || "Citizen";
-    return t(uiRole.toLowerCase().replace(/ /g, "_"));
+    // Return the role in camelCase format (e.g., "Collector Team Advanced")
+    return getRoleDisplayName(dbRole);
   };
 
   return (
@@ -731,7 +752,6 @@ function AppLayoutContent({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { t } = useLanguage();
   const { data: session } = useSession();
   const [showCmdk, setShowCmdk] = useState(false);
   const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
@@ -766,6 +786,14 @@ function AppLayoutContent({
         <div className="flex-1 flex justify-center items-center gap-4">
           {/* <RoleSwitcher /> */}
           {/* <ViewSwitcher /> */}
+          {session && (
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 border border-border/50 backdrop-blur-sm">
+              <div className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-pulse" />
+              <span className="text-xs font-medium text-muted-foreground">
+                {getRoleDisplayName((session?.user as any)?.role)}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-1">

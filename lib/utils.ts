@@ -178,7 +178,50 @@ export const isCollectorView = (role: Role) => {
   );
 };
 
-export const isDepartmentView = (role: Role) => role === Role.DEPARTMENT_TEAM;
+// List of all department roles (excluding DEPARTMENT_TEAM which is generic)
+const departmentRoles: Role[] = [
+  Role.PWD_1,
+  Role.PWD_2,
+  Role.RTO,
+  Role.ZILLA_PARISHAD,
+  Role.SP_OFFICE_GONDIA,
+  Role.SUPPLY_DEPARTMENT,
+  Role.HEALTH_DEPARTMENT,
+  Role.MSEB_GONDIA,
+  Role.TRAFFIC_POLICE,
+  Role.NAGAR_PARISHAD_TIRORA,
+  Role.NAGAR_PARISHAD_GONDIA,
+  Role.NAGAR_PARISHAD_AMGAON,
+  Role.NAGAR_PARISHAD_GOREGAON,
+  Role.DEAN_MEDICAL_COLLEGE_GONDIA,
+  Role.FOREST_OFFICE_GONDIA,
+  Role.SAMAJ_KALYAN_OFFICE_GONDIA,
+  Role.SLR_OFFICE_GONDIA,
+];
+
+/**
+ * Checks if a role is a department role (including DEPARTMENT_TEAM)
+ */
+export const isDepartmentRole = (role: Role): boolean => {
+  return role === Role.DEPARTMENT_TEAM || departmentRoles.includes(role);
+};
+
+/**
+ * Gets the department enum value from a department role
+ * Returns null if the role is not a department role or is DEPARTMENT_TEAM (generic)
+ */
+export const getDepartmentFromRole = (role: Role): string | null => {
+  if (role === Role.DEPARTMENT_TEAM) {
+    return null; // Generic department team has no specific department
+  }
+  if (departmentRoles.includes(role)) {
+    // Department role names match department enum values
+    return role;
+  }
+  return null;
+};
+
+export const isDepartmentView = (role: Role) => isDepartmentRole(role);
 
 export const isCollectorTeamView = (role: Role) =>
   role === Role.COLLECTOR_TEAM || role === Role.COLLECTOR_TEAM_ADVANCED;
