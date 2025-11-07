@@ -114,6 +114,12 @@ export async function PATCH(
     // Update the complaint
     await prisma.complaint.update({ where: { id }, data });
 
+    // Get updated complaint to get the latest department for notifications
+    const updatedComplaint = await prisma.complaint.findUnique({
+      where: { id },
+      select: { department: true },
+    });
+
     // Create history entry for status change
     if (hasStatusChange && newStatus) {
       await prisma.complaintHistory.create({
@@ -136,6 +142,7 @@ export async function PATCH(
         complaintId: id,
         complaintRef,
         createdBy: userId,
+        complaintDepartment: updatedComplaint?.department || null,
       });
     }
 

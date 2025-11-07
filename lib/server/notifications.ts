@@ -79,17 +79,31 @@ export async function notifyStatusChange(params: {
   complaintId: number;
   complaintRef: string;
   createdBy: number;
+  complaintDepartment?: Department | null;
 }) {
-  const { oldStatus, newStatus, complaintId, complaintRef, createdBy } = params;
+  const {
+    oldStatus,
+    newStatus,
+    complaintId,
+    complaintRef,
+    createdBy,
+    complaintDepartment,
+  } = params;
 
-  // Open to Assigned → notify DEPARTMENT_TEAM
+  // Open to Assigned → notify the specific department role (or DEPARTMENT_TEAM if generic)
   if (oldStatus === "OPEN" && newStatus === "ASSIGNED") {
+    const targetRole = getDepartmentRoleFromDepartment(
+      complaintDepartment ?? null
+    );
+    const deptName = getDepartmentName(complaintDepartment ?? null);
     await createNotification({
-      forRole: "DEPARTMENT_TEAM",
+      forRole: targetRole,
       type: "ASSIGNMENT",
       title: "New complaint assigned",
       // Include raw numeric id in the message so the client can search by it directly
-      message: `Complaint ${complaintId} has been assigned to your department. (${complaintRef})`,
+      message: `Complaint ${complaintId} has been assigned to your department${
+        deptName ? ` (${deptName})` : ""
+      }. (${complaintRef})`,
       createdBy,
     });
   }
@@ -118,8 +132,62 @@ function getDepartmentName(department: Department | null): string {
     HEALTH: "Health",
     URBAN_PLANNING: "Urban Planning",
     POLICE: "Police",
+    PWD_1: "PWD 1",
+    PWD_2: "PWD 2",
+    RTO: "RTO",
+    ZILLA_PARISHAD: "Zilla Parishad",
+    SP_OFFICE_GONDIA: "SP Office Gondia",
+    SUPPLY_DEPARTMENT: "Supply Department",
+    HEALTH_DEPARTMENT: "Health Department",
+    MSEB_GONDIA: "MSEB Gondia",
+    TRAFFIC_POLICE: "Traffic Police",
+    NAGAR_PARISHAD_TIRORA: "Nagar Parishad Tirora",
+    NAGAR_PARISHAD_GONDIA: "Nagar Parishad Gondia",
+    NAGAR_PARISHAD_AMGAON: "Nagar Parishad Amgaon",
+    NAGAR_PARISHAD_GOREGAON: "Nagar Parishad Goregaon",
+    DEAN_MEDICAL_COLLEGE_GONDIA: "Dean Medical College Gondia",
+    FOREST_OFFICE_GONDIA: "Forest Office Gondia",
+    SAMAJ_KALYAN_OFFICE_GONDIA: "Samaj Kalyan Office Gondia",
+    SLR_OFFICE_GONDIA: "SLR Office Gondia",
   };
   return deptMap[department] || "";
+}
+
+/**
+ * Maps department enum to the corresponding department role
+ * Returns the specific department role if it exists, otherwise returns DEPARTMENT_TEAM
+ */
+function getDepartmentRoleFromDepartment(department: Department | null): Role {
+  if (!department) return "DEPARTMENT_TEAM";
+
+  // Map department to role (department enum values match role enum values for department roles)
+  const deptToRoleMap: Record<Department, Role> = {
+    PUBLIC_WORKS: "DEPARTMENT_TEAM",
+    WATER_SUPPLY: "DEPARTMENT_TEAM",
+    SANITATION: "DEPARTMENT_TEAM",
+    HEALTH: "DEPARTMENT_TEAM",
+    URBAN_PLANNING: "DEPARTMENT_TEAM",
+    POLICE: "DEPARTMENT_TEAM",
+    PWD_1: "PWD_1",
+    PWD_2: "PWD_2",
+    RTO: "RTO",
+    ZILLA_PARISHAD: "ZILLA_PARISHAD",
+    SP_OFFICE_GONDIA: "SP_OFFICE_GONDIA",
+    SUPPLY_DEPARTMENT: "SUPPLY_DEPARTMENT",
+    HEALTH_DEPARTMENT: "HEALTH_DEPARTMENT",
+    MSEB_GONDIA: "MSEB_GONDIA",
+    TRAFFIC_POLICE: "TRAFFIC_POLICE",
+    NAGAR_PARISHAD_TIRORA: "NAGAR_PARISHAD_TIRORA",
+    NAGAR_PARISHAD_GONDIA: "NAGAR_PARISHAD_GONDIA",
+    NAGAR_PARISHAD_AMGAON: "NAGAR_PARISHAD_AMGAON",
+    NAGAR_PARISHAD_GOREGAON: "NAGAR_PARISHAD_GOREGAON",
+    DEAN_MEDICAL_COLLEGE_GONDIA: "DEAN_MEDICAL_COLLEGE_GONDIA",
+    FOREST_OFFICE_GONDIA: "FOREST_OFFICE_GONDIA",
+    SAMAJ_KALYAN_OFFICE_GONDIA: "SAMAJ_KALYAN_OFFICE_GONDIA",
+    SLR_OFFICE_GONDIA: "SLR_OFFICE_GONDIA",
+  };
+
+  return deptToRoleMap[department] || "DEPARTMENT_TEAM";
 }
 
 /**
@@ -165,11 +233,12 @@ export async function notifyRemark(params: {
   const isCollectorStakeholder =
     remarkCreatorRole && collectorRoles.includes(remarkCreatorRole);
 
-  // If a collector/stakeholder leaves a remark and complaint has a department, notify DEPARTMENT_TEAM
+  // If a collector/stakeholder leaves a remark and complaint has a department, notify the specific department role
   if (isCollectorStakeholder && complaintDepartment) {
     const deptName = getDepartmentName(complaintDepartment);
+    const targetDeptRole = getDepartmentRoleFromDepartment(complaintDepartment);
     await createNotification({
-      forRole: "DEPARTMENT_TEAM",
+      forRole: targetDeptRole,
       type: "REMARK",
       title: "New remark on complaint",
       message: `A ${visibility.toLowerCase()} remark has been added to complaint ${complaintRef}${
@@ -182,15 +251,21 @@ export async function notifyRemark(params: {
   // Notify based on current status (existing logic)
   const targetRole = getNotificationRoleForStatus(currentStatus);
   if (targetRole) {
-    // Only create status-based notification if we haven't already notified DEPARTMENT_TEAM above
+    // If target role is DEPARTMENT_TEAM and we have a specific department, use the specific department role
+    let finalTargetRole = targetRole;
+    if (targetRole === "DEPARTMENT_TEAM" && complaintDepartment) {
+      finalTargetRole = getDepartmentRoleFromDepartment(complaintDepartment);
+    }
+
+    // Only create status-based notification if we haven't already notified the department above
     // to avoid duplicate notifications
     const alreadyNotified =
       isCollectorStakeholder &&
       complaintDepartment &&
-      targetRole === "DEPARTMENT_TEAM";
+      finalTargetRole === getDepartmentRoleFromDepartment(complaintDepartment);
     if (!alreadyNotified) {
       await createNotification({
-        forRole: targetRole,
+        forRole: finalTargetRole,
         type: "REMARK",
         title: "New remark on complaint",
         message: `A ${visibility.toLowerCase()} remark has been added to complaint ${complaintRef}.`,
