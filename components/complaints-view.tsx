@@ -449,6 +449,19 @@ const getStatusOptionsForRole = (
   currentStatus: ComplaintStatus,
   userRole: UserRole
 ): (ComplaintStatus | "Reopen" | "Assign")[] => {
+  // District Collector can change status to any value
+  if (userRole === "District Collector") {
+    return [
+      "Open",
+      "In Progress",
+      "Resolved",
+      "Backlog",
+      "Need Details",
+      "Invalid",
+      "Assign",
+      "Reopen",
+    ];
+  }
   if (userRole === "Collector Team" || userRole === "Collector Team Advanced") {
     if (currentStatus === "Open") return ["Assign", "Invalid", "Need Details"];
     if (currentStatus === "Need Details") return ["Open", "Assign"];
@@ -1229,6 +1242,22 @@ export default function ComplaintsView({
       return {
         commonStatus: firstStatus,
         possibleActions: getStatusOptionsForRole(firstStatus, role),
+      };
+    }
+    // District Collector can change status even when statuses are mixed
+    if (role === "District Collector") {
+      return {
+        commonStatus: "mixed",
+        possibleActions: [
+          "Open",
+          "In Progress",
+          "Resolved",
+          "Backlog",
+          "Need Details",
+          "Invalid",
+          "Assign",
+          "Reopen",
+        ],
       };
     }
     return { commonStatus: "mixed", possibleActions: [] };

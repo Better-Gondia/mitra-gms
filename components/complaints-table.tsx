@@ -1381,6 +1381,18 @@ export default function ComplaintsTable({
     currentStatus: ComplaintStatus,
     userRole: UserRole
   ): (ComplaintStatus | "Assign")[] => {
+    // District Collector can change status to any value
+    if (userRole === "District Collector") {
+      return [
+        "Open",
+        "In Progress",
+        "Resolved",
+        "Backlog",
+        "Need Details",
+        "Invalid",
+        "Assign",
+      ];
+    }
     if (
       userRole === "Collector Team" ||
       userRole === "Collector Team Advanced"
@@ -2200,7 +2212,7 @@ export default function ComplaintsTable({
                               </RadioGroup>
 
                               <div className="flex items-center gap-2">
-                                {newStatus === "In Progress" && (
+                                {/* {newStatus === "In Progress" && (
                                   <Popover
                                     open={isEtaPopoverOpen}
                                     onOpenChange={setIsEtaPopoverOpen}
@@ -2257,8 +2269,8 @@ export default function ComplaintsTable({
                                       </div>
                                     </PopoverContent>
                                   </Popover>
-                                )}
-                                {(newStatus === "Resolved" ||
+                                )} */}
+                                {/* {(newStatus === "Resolved" ||
                                   (isReopening &&
                                     complaint.status === "Resolved")) && (
                                   <Button
@@ -2280,7 +2292,7 @@ export default function ComplaintsTable({
                                       />
                                     </div>
                                   </Button>
-                                )}
+                                )} */}
                               </div>
 
                               {["Resolved", "Invalid", "Backlog"].includes(
