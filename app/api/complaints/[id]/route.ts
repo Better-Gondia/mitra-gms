@@ -4,6 +4,7 @@ import {
   Mapper,
   mapDbComplaintToUi,
   parseUiIdToDbId,
+  parseUiIdToDbIdAsync,
 } from "@/lib/server/mappers";
 import { getServerSession } from "next-auth";
 import { authOptions, ExtendedSession } from "@/lib/auth";
@@ -14,7 +15,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: paramId } = await params;
-  const id = parseUiIdToDbId(paramId);
+  // Use async version to properly handle split complaint displayIds
+  const id = await parseUiIdToDbIdAsync(paramId);
   if (!Number.isFinite(id))
     return NextResponse.json({ error: "Invalid id" }, { status: 400 });
   const complaint = await prisma.complaint.findUnique({
@@ -52,7 +54,8 @@ export async function PATCH(
     }
 
     const { id: paramId } = await params;
-    const id = parseUiIdToDbId(paramId);
+    // Use async version to properly handle split complaint displayIds
+    const id = await parseUiIdToDbIdAsync(paramId);
     if (!Number.isFinite(id))
       return NextResponse.json({ error: "Invalid id" }, { status: 400 });
 

@@ -92,7 +92,12 @@ import {
 } from "lucide-react";
 import { SplitComplaintDialog } from "@/components/split-complaint-dialog";
 import { Button } from "./ui/button";
-import { cn, formatPreciseDuration } from "@/lib/utils";
+import {
+  cn,
+  formatPreciseDuration,
+  formatComplaintIdDisplay,
+  getComplaintIdForCopy,
+} from "@/lib/utils";
 import { useLanguage } from "@/hooks/use-language";
 import { useRole } from "@/hooks/use-role";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -760,9 +765,10 @@ const RemarkCard: React.FC<{
     const reason = reasonMatch ? reasonMatch[1] : "Linked";
 
     const handleCopyId = () => {
-      navigator.clipboard.writeText(linkedComplaint.id).then(() => {
+      const idToCopy = getComplaintIdForCopy(linkedComplaint);
+      navigator.clipboard.writeText(idToCopy).then(() => {
         toast.success(
-          `${t("complaint_id")} ${linkedComplaint.id} ${t("has_been_copied")}`
+          `${t("complaint_id")} ${idToCopy} ${t("has_been_copied")}`
         );
       });
     };
@@ -773,7 +779,7 @@ const RemarkCard: React.FC<{
           <div className="flex items-start justify-between gap-2 mb-1">
             <div className="flex items-center gap-2">
               <span className="font-mono text-sm font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
-                {linkedComplaint.id}
+                {formatComplaintIdDisplay(linkedComplaint)}
               </span>
               <Badge
                 variant={statusColors[linkedComplaint.status]}
@@ -1428,30 +1434,43 @@ export default function ComplaintsTable({
     )
       return true;
 
-    return false;
+    // Allow remarks to be added even if no status options are available
+    // Check if user has permission to add remarks
+    const canAddRemarks = [
+      "District Collector",
+      "Collector Team",
+      "Collector Team Advanced",
+      "Department Team",
+    ].includes(role);
+
+    return canAddRemarks; // Allow popover to open for adding remarks
   };
 
-  const handleCopyId = (id: string) => {
-    navigator.clipboard.writeText(id).then(() => {
-      toast.success(`${t("complaint_id")} ${id} ${t("has_been_copied")}`);
+  const handleCopyId = (complaint: Complaint) => {
+    const idToCopy = getComplaintIdForCopy(complaint);
+    navigator.clipboard.writeText(idToCopy).then(() => {
+      toast.success(`${t("complaint_id")} ${idToCopy} ${t("has_been_copied")}`);
     });
   };
 
-  const handleCopyLink = (id: string) => {
-    const link = `${window.location.origin}/?search=${id}`;
+  const handleCopyLink = (complaint: Complaint) => {
+    const idToUse = getComplaintIdForCopy(complaint);
+    const link = `${window.location.origin}/?search=${idToUse}`;
     navigator.clipboard.writeText(link).then(() => {
-      toast.success(`Link to complaint ${id} has been copied.`);
+      toast.success(`Link to complaint ${idToUse} has been copied.`);
     });
   };
 
   const handleShareOnWhatsApp = (complaint: Complaint) => {
-    const link = `${window.location.origin}/?search=${complaint.id}`;
+    const idToUse = getComplaintIdForCopy(complaint);
+    const link = `${window.location.origin}/?search=${idToUse}`;
     const statusText = t(complaint.status.toLowerCase().replace(/ /g, "_"));
-    const message = `${t("complaint_id")}: ${complaint.id}\n${t(
-      "status"
-    )}: ${statusText}\n${complaint.description.substring(0, 100)}${
-      complaint.description.length > 100 ? "..." : ""
-    }\n\n${link}`;
+    const message = `${t("complaint_id")}: ${formatComplaintIdDisplay(
+      complaint
+    )}\n${t("status")}: ${statusText}\n${complaint.description.substring(
+      0,
+      100
+    )}${complaint.description.length > 100 ? "..." : ""}\n\n${link}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
   };
@@ -1467,7 +1486,9 @@ export default function ComplaintsTable({
       <html>
         <head>
           <meta charset="UTF-8">
-          <title>${complaint.id} - Complaint Details</title>
+          <title>${formatComplaintIdDisplay(
+            complaint
+          )} - Complaint Details</title>
           <style>
             @page {
               size: A4;
@@ -1537,7 +1558,9 @@ export default function ComplaintsTable({
         </head>
         <body>
           <div class="header">
-            <div class="complaint-id">${complaint.id}</div>
+            <div class="complaint-id">${formatComplaintIdDisplay(
+              complaint
+            )}</div>
             <div>Submitted: ${format(complaint.submittedDate, "PPpp")}</div>
             <div>Last Updated: ${format(complaint.lastUpdated, "PPpp")}</div>
           </div>
@@ -1952,7 +1975,7 @@ export default function ComplaintsTable({
                           </TooltipProvider>
                         )} */}
                         <span className="font-mono text-sm font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
-                          {complaint.id}
+                          {formatComplaintIdDisplay(complaint)}
                         </span>
                         {complaint.isSplit && (
                           <Badge variant="secondary" className="text-xs ml-1">
@@ -2408,12 +2431,12 @@ export default function ComplaintsTable({
                             </DropdownMenuSubTrigger>
                             <DropdownMenuSubContent>
                               <DropdownMenuItem
-                                onSelect={() => handleCopyId(complaint.id)}
+                                onSelect={() => handleCopyId(complaint)}
                               >
                                 <span>{t("copy_complaint_id")}</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onSelect={() => handleCopyLink(complaint.id)}
+                                onSelect={() => handleCopyLink(complaint)}
                               >
                                 <span>{t("copy_link")}</span>
                               </DropdownMenuItem>

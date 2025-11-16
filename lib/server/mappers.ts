@@ -210,6 +210,7 @@ function generateComplaintIdFromDate(
 export function mapDbComplaintToUi(db: any): UIComplaint {
   const ui: UIComplaint = {
     id: generateComplaintIdFromDate(db.id, db.createdAt, db.displayId),
+    dbId: db.id, // Store actual database ID for display purposes
     title: db.title ?? "",
     description: db.description ?? "",
     status: statusMapToUI[db.status as DBStatus],
@@ -347,8 +348,44 @@ export function parseUiIdToDbId(uiIdOrNumeric: string | number): number {
   if (newFormatMatch) return parseInt(newFormatMatch[1], 10);
 
   // Handle split IDs (BG-{id}-N format for split complaints)
+  // Note: This returns the parent ID. For actual database ID lookup, use parseUiIdToDbIdAsync
   const splitMatch = uiIdOrNumeric.match(/^BG-(\d+)-(\d+)$/i);
   if (splitMatch) return parseInt(splitMatch[1], 10);
+
+  // Handle legacy BG-DDMMYY-#### format (backward compatibility)
+  const legacyMatch = uiIdOrNumeric.match(/^BG-\d{6}-(\d+)$/i);
+  if (legacyMatch) return parseInt(legacyMatch[1], 10);
+
+  // Handle old GC-#### format
+  const oldM = uiIdOrNumeric.match(/^(?:GC-)?(\d+)$/i);
+  return oldM ? parseInt(oldM[1], 10) : NaN;
+}
+
+/**
+ * Async version that looks up the actual database ID for split complaints by displayId
+ */
+export async function parseUiIdToDbIdAsync(
+  uiIdOrNumeric: string | number
+): Promise<number> {
+  if (typeof uiIdOrNumeric === "number") return uiIdOrNumeric;
+
+  // Handle new BG-{id} format (e.g., BG-1234)
+  const newFormatMatch = uiIdOrNumeric.match(/^BG-(\d+)$/i);
+  if (newFormatMatch) return parseInt(newFormatMatch[1], 10);
+
+  // Handle split IDs (BG-{id}-N format for split complaints)
+  // Look up by displayId to get the actual database ID
+  const splitMatch = uiIdOrNumeric.match(/^BG-(\d+)-(\d+)$/i);
+  if (splitMatch) {
+    const prisma = (await import("@/prisma/db")).default;
+    const complaint = await prisma.complaint.findFirst({
+      where: { displayId: uiIdOrNumeric },
+      select: { id: true },
+    });
+    if (complaint) return complaint.id;
+    // Fallback to parent ID if not found
+    return parseInt(splitMatch[1], 10);
+  }
 
   // Handle legacy BG-DDMMYY-#### format (backward compatibility)
   const legacyMatch = uiIdOrNumeric.match(/^BG-\d{6}-(\d+)$/i);

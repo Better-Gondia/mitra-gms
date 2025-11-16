@@ -167,6 +167,7 @@ export type Notification = {
 
 export type Complaint = {
   id: string;
+  dbId?: number; // Actual database ID (for display purposes with split/merged complaints)
   title: string;
   description: string;
   status: ComplaintStatus;

@@ -225,3 +225,86 @@ export const isDepartmentView = (role: Role) => isDepartmentRole(role);
 
 export const isCollectorTeamView = (role: Role) =>
   role === Role.COLLECTOR_TEAM || role === Role.COLLECTOR_TEAM_ADVANCED;
+
+/**
+ * Formats complaint ID for display, showing both actual ID and split/merge ID when applicable
+ * For split complaints: "91 (50-1)" where 91 is actual ID and 50-1 is displayId
+ * For merged complaints: "100 (50, 51, 52)" where 100 is actual ID and 50,51,52 are original IDs
+ * For normal complaints: "BG-50" (just the regular ID)
+ */
+export function formatComplaintIdDisplay(complaint: {
+  id: string;
+  dbId?: number;
+  displayId?: string;
+  isSplit?: boolean;
+  isMerged?: boolean;
+  originalComplaintIds?: number[];
+}): string {
+  const { id, dbId, displayId, isSplit, isMerged, originalComplaintIds } =
+    complaint;
+
+  // Try to extract dbId from id if not provided (fallback for old data)
+  let actualDbId = dbId;
+  if (!actualDbId && id) {
+    // Try to parse BG-{number} format
+    const bgMatch = id.match(/^BG-(\d+)$/);
+    if (bgMatch) {
+      actualDbId = parseInt(bgMatch[1], 10);
+    }
+  }
+
+  // For split complaints: show actual ID and displayId
+  // Note: Child split complaints have displayId but isSplit=false, so check displayId instead
+  if (displayId && actualDbId && displayId.includes("-")) {
+    // displayId format is like "BG-50-1" or "50-1" for split complaints
+    // Format the actual DB ID with BG- prefix
+    return `BG-${actualDbId} (${displayId})`;
+  }
+
+  // For merged complaints: show actual ID and original complaint IDs
+  // Check originalComplaintIds regardless of isMerged flag (primary complaint may not have isMerged=true)
+  if (actualDbId && originalComplaintIds && originalComplaintIds.length > 0) {
+    const originalIdsStr = originalComplaintIds
+      .map((id) => `BG-${id}`)
+      .join(", ");
+    return `BG-${actualDbId} (${originalIdsStr})`;
+  }
+
+  // For normal complaints: just return the regular ID
+  return id;
+}
+
+/**
+ * Gets the complaint ID for copying (without displayId or original IDs in parentheses)
+ * For split complaints: returns "BG-407" instead of "BG-407 (BG-398-2)"
+ * For merged complaints: returns "BG-100" instead of "BG-100 (BG-50, BG-51, BG-52)"
+ * For normal complaints: returns the regular ID
+ */
+export function getComplaintIdForCopy(complaint: {
+  id: string;
+  dbId?: number;
+  displayId?: string;
+  isSplit?: boolean;
+  isMerged?: boolean;
+  originalComplaintIds?: number[];
+}): string {
+  const { id, dbId } = complaint;
+
+  // Try to extract dbId from id if not provided (fallback for old data)
+  let actualDbId = dbId;
+  if (!actualDbId && id) {
+    // Try to parse BG-{number} format
+    const bgMatch = id.match(/^BG-(\d+)$/);
+    if (bgMatch) {
+      actualDbId = parseInt(bgMatch[1], 10);
+    }
+  }
+
+  // If we have the actual database ID, format it with BG- prefix
+  if (actualDbId) {
+    return `BG-${actualDbId}`;
+  }
+
+  // Fallback: return the regular ID
+  return id;
+}

@@ -58,7 +58,7 @@ import {
   MapPin,
   Download,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatComplaintIdDisplay } from "@/lib/utils";
 import { useLanguage } from "@/hooks/use-language";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiPatchComplaint } from "@/lib/utils";
@@ -551,7 +551,8 @@ const EditDetailsDialog: React.FC<{
         <DialogHeader>
           <DialogTitle>Edit Complaint Details</DialogTitle>
           <DialogDescription>
-            Update details for complaint ID: {complaint.id}
+            Update details for complaint ID:{" "}
+            {formatComplaintIdDisplay(complaint)}
           </DialogDescription>
         </DialogHeader>
         <div className="py-4 space-y-4">

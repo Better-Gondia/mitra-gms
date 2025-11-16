@@ -34,6 +34,7 @@ export function useComplaints({
       };
     },
     enabled,
-    staleTime: 30_000,
+    staleTime: 300_000, // 5 minutes
+    refetchOnWindowFocus: false, // Disable automatic refetch on window focus
   });
 }

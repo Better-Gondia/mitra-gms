@@ -51,7 +51,11 @@ import {
   ChevronsUpDown,
 } from "lucide-react";
 import { format } from "date-fns";
-import { cn, formatBusinessDuration } from "@/lib/utils";
+import {
+  cn,
+  formatBusinessDuration,
+  formatComplaintIdDisplay,
+} from "@/lib/utils";
 import { Badge } from "@/components/badge";
 import { useLanguage } from "@/hooks/use-language";
 import type { ComplaintSummary } from "@/ai/flows/summarize-complaint-flow";
@@ -569,7 +573,7 @@ const LinkComplaintDialog: React.FC<{
                     )}
                   >
                     <p className="font-semibold">
-                      {c.id}: {c.title}
+                      {formatComplaintIdDisplay(c)}: {c.title}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {c.location} &bull; {c.department}
@@ -899,7 +903,7 @@ export default function ComplaintDetails({
           </h2>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="font-mono text-sm font-semibold text-primary bg-primary/10 px-2 py-1 rounded border border-primary/20">
-              ID: {complaint.id}
+              ID: {formatComplaintIdDisplay(complaint)}
             </span>
             <Badge
               variant={statusColors[complaint.status]}
@@ -969,7 +973,7 @@ export default function ComplaintDetails({
             </div>
           </div>
           <div className="print-header-meta">
-            <strong>Complaint ID:</strong> {complaint.id}
+            <strong>Complaint ID:</strong> {formatComplaintIdDisplay(complaint)}
           </div>
         </header>
         <div className="print-meta-bar">

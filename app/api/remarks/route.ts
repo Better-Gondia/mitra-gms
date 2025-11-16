@@ -3,7 +3,7 @@ import prisma from "@/prisma/db";
 import { getServerSession } from "next-auth";
 import { authOptions, ExtendedSession } from "@/lib/auth";
 import { notifyRemark } from "@/lib/server/notifications";
-import { parseUiIdToDbId } from "@/lib/server/mappers";
+import { parseUiIdToDbId, parseUiIdToDbIdAsync } from "@/lib/server/mappers";
 import { Role } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
@@ -18,7 +18,8 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const userId = parseInt(session.user.id);
-    const complaintId = parseUiIdToDbId(body.complaintId);
+    // Use async version to properly handle split complaint displayIds
+    const complaintId = await parseUiIdToDbIdAsync(body.complaintId);
     const complaintRef = body.complaintRef || body.complaintId;
 
     if (!complaintId || !Number.isFinite(complaintId)) {
@@ -157,7 +158,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const id = parseUiIdToDbId(complaintId);
+    const id = await parseUiIdToDbIdAsync(complaintId);
     if (!Number.isFinite(id)) {
       return NextResponse.json(
         { error: "Invalid complaint ID" },

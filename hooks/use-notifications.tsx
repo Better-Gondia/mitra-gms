@@ -84,11 +84,11 @@ export function NotificationProvider({
     // Initial load
     fetchRoleAndHasNotifications();
     fetchNotifications();
-    // Poll occasionally for updates
+    // Poll every 5 minutes for updates
     const interval = setInterval(() => {
       fetchRoleAndHasNotifications();
       fetchNotifications();
-    }, 60_000);
+    }, 300_000); // 5 minutes
     return () => clearInterval(interval);
   }, [fetchRoleAndHasNotifications, fetchNotifications]);
 

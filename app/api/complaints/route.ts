@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const session = (await getServerSession(
       authOptions
     )) as ExtendedSession | null;
-    
+
     const { searchParams } = new URL(request.url);
 
     // Pagination parameters
