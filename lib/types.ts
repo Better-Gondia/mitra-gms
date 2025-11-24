@@ -43,12 +43,13 @@ export const stakeholderRoles = [
 ] as const;
 
 export const departments = [
-  "Public Works",
-  "Water Supply",
-  "Sanitation",
-  "Health",
-  "Urban Planning",
-  "Police",
+  // "Public Works",
+  // "Water Supply",
+  // "Sanitation",
+  // "Health",
+  // "Urban Planning",
+  // "Police",
+
   "PWD 1",
   "PWD 2",
   "RTO",

@@ -1408,7 +1408,8 @@ export default function ComplaintsTable({
       if (currentStatus === "Need Details") return ["Open", "Assign"];
     }
     if (userRole === "Department Team") {
-      if (currentStatus === "Assigned") return ["In Progress", "Need Details"];
+      if (currentStatus === "Assigned")
+        return ["In Progress", "Resolved", "Need Details"];
       if (currentStatus === "In Progress")
         return ["Resolved", "Backlog", "Need Details"];
       if (currentStatus === "Backlog") return ["In Progress"];
@@ -2010,6 +2011,23 @@ export default function ComplaintsTable({
                         <span className="text-xs text-muted-foreground">
                           {format(new Date(complaint.submittedDate), "PPp")}
                         </span>
+                        {/* Show department for assigned complaints in collector view */}
+                        {complaint.status === "Assigned" &&
+                          complaint.department &&
+                          role === "District Collector" && (
+                            <>
+                              <span className="text-gray-300 dark:text-gray-700">
+                                •
+                              </span>
+                              <Badge
+                                variant="outline"
+                                className="text-xs font-medium flex items-center gap-1 border-primary/20 text-primary bg-primary/5"
+                              >
+                                <Building className="h-3 w-3" />
+                                {complaint.department}
+                              </Badge>
+                            </>
+                          )}
                         {complaint.linkedComplaintIds &&
                           complaint.linkedComplaintIds.length > 0 && (
                             <TooltipProvider>

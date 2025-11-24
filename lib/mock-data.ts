@@ -73,7 +73,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "Garbage bins in our area are overflowing. The collection truck has not come for the past three days. It is causing a foul smell and attracting stray animals.",
     status: "Assigned",
-    department: "Sanitation",
+    department: "Nagar Parishad Gondia",
     priority: "Normal",
     submittedDate: oldDate(2, 11, 0),
     history: [
@@ -82,7 +82,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Sanitation department for necessary action.",
-        "Sanitation"
+        "Nagar Parishad Gondia"
       ),
     ],
     category: "Waste Management",
@@ -97,7 +97,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "The main swing set in the public park at Ramnagar is broken and has sharp edges. It is dangerous for the children playing there.",
     status: "In Progress",
-    department: "Public Works",
+    department: "PWD 1",
     priority: "High",
     submittedDate: oldDate(4, 14, 0),
     history: [
@@ -115,7 +115,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Assigned to Public Works for park maintenance.",
-        "Public Works",
+        "PWD 1",
         "High"
       ),
     ],
@@ -139,7 +139,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "Due to yesterday's storm, a huge tree has fallen and is completely blocking the main road to our village, affecting transport.",
     status: "Resolved",
-    department: "Public Works",
+    department: "PWD 1",
     priority: "High",
     submittedDate: oldDate(2, 6, 0),
     history: [
@@ -158,14 +158,14 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Department Team",
         "Status changed to In Progress",
         "Team with heavy machinery has been dispatched to the location.",
-        "Public Works"
+        "PWD 1"
       ),
       createHistory(
         oldDate(2, 7, 0),
         "Collector Team",
         "Complaint Assigned",
         "Urgent. PWD team dispatched for immediate clearance.",
-        "Public Works",
+        "PWD 1",
         "High"
       ),
     ],
@@ -189,7 +189,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "A local clinic near the General Hospital is disposing of used syringes, masks, and other medical waste in the public garbage dump. This is a severe health hazard for the entire locality.",
     status: "Resolved",
-    department: "Health",
+    department: "Health Department",
     priority: "High",
     submittedDate: oldDate(45, 16, 0),
     history: [
@@ -226,7 +226,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to the Chief Health Officer for immediate investigation and action.",
-        "Health",
+        "Health Department",
         "High"
       ),
     ],
@@ -242,7 +242,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "My property tax bill for this year seems to have been calculated incorrectly. The amount is almost double compared to last year, without any apparent reason or new construction.",
     status: "Need Details",
-    department: "Urban Planning",
+    department: "Nagar Parishad Gondia",
     submittedDate: oldDate(50, 13, 0),
     history: [
       createHistory(
@@ -256,7 +256,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to revenue department for clarification and verification.",
-        "Urban Planning"
+        "Nagar Parishad Gondia"
       ),
     ],
     category: "Utilities",
@@ -314,7 +314,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "The street lights in our lane were fixed last week, but they have stopped working again after just two days. This seems to be a recurring problem that needs a permanent solution.",
     status: "In Progress", // Reopened and now being worked on
-    department: "Public Works",
+    department: "PWD 1",
     priority: "High",
     submittedDate: oldDate(30, 20, 0),
     history: [
@@ -329,7 +329,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Reopened",
         "Reopening as the issue has resurfaced. PWD to investigate the root cause instead of a temporary fix.",
-        "Public Works",
+        "PWD 1",
         "High"
       ),
       createHistory(
@@ -343,7 +343,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Assigning to PWD electrical maintenance wing.",
-        "Public Works"
+        "PWD 1"
       ),
     ],
     category: "Infrastructure",
@@ -358,7 +358,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "There has been a rise in chain snatching incidents in our neighborhood. We request increased police patrolling in the area, especially during evening hours.",
     status: "Assigned",
-    department: "Police",
+    department: "SP Office Gondia",
     priority: "High",
     submittedDate: oldDate(40, 18, 0),
     history: [
@@ -367,7 +367,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to the Superintendent of Police for immediate action and to increase patrolling.",
-        "Police",
+        "SP Office Gondia",
         "High"
       ),
     ],
@@ -397,7 +397,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "There is no water supply in our area, Pratap Nagar, for the last 2 days. We are facing a lot of problems. Please resolve this urgently.",
     status: "Resolved",
-    department: "Water Supply",
+    department: "Supply Department",
     submittedDate: oldDate(15, 8, 0),
     history: [
       createHistory(
@@ -411,7 +411,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Water Supply dept.",
-        "Water Supply"
+        "Supply Department"
       ),
     ],
     category: "Utilities",
@@ -427,7 +427,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "A main water supply pipeline has burst near the Pratap Nagar junction, leading to a complete shutdown of water supply to multiple areas. Repair work is needed on an emergency basis.",
     status: "In Progress",
-    department: "Water Supply",
+    department: "Supply Department",
     priority: "High",
     submittedDate: oldDate(15, 7, 0),
     history: [
@@ -445,7 +445,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Urgent. Forwarded to Water Supply department.",
-        "Water Supply",
+        "Supply Department",
         "High"
       ),
     ],
@@ -462,7 +462,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "बस स्थानकाजवळील सार्वजनिक शौचालयाची अत्यंत वाईट अवस्था आहे. स्वच्छता केली जात नाही आणि पाण्याची सोय नाही. कृपया त्वरित लक्ष द्या.",
     status: "Resolved",
-    department: "Sanitation",
+    department: "Nagar Parishad Gondia",
     submittedDate: oldDate(45, 9, 15),
     history: [
       createHistory(
@@ -480,7 +480,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Sanitation department.",
-        "Sanitation"
+        "Nagar Parishad Gondia"
       ),
     ],
     category: "Sanitation",
@@ -495,7 +495,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "हमारे इलाके में एक अवैध निर्माण चल रहा है जो सड़क की सीमा में आ रहा है। इससे भविष्य में ट्रैफिक की समस्या होगी। कृपया इसे रोकें।",
     status: "In Progress",
-    department: "Urban Planning",
+    department: "Nagar Parishad Gondia",
     submittedDate: oldDate(65, 10, 0),
     history: [
       createHistory(
@@ -509,7 +509,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Urban Planning for verification and action.",
-        "Urban Planning"
+        "Nagar Parishad Gondia"
       ),
     ],
     category: "Encroachment",
@@ -524,7 +524,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "The road in front of the Vidya Mandir school has very fast traffic. We request the installation of speed breakers to ensure the safety of children.",
     status: "Resolved",
-    department: "Public Works",
+    department: "PWD 1",
     submittedDate: oldDate(95, 8, 0),
     history: [
       createHistory(
@@ -548,7 +548,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to PWD. Marked as high priority due to school safety.",
-        "Public Works",
+        "PWD 1",
         "High"
       ),
     ],
@@ -564,7 +564,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "A large pothole has formed on Main Street, causing traffic issues.",
     status: "Resolved",
-    department: "Public Works",
+    department: "PWD 1",
     submittedDate: oldDate(20),
     history: [
       createHistory(
@@ -572,7 +572,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to PWD.",
-        "Public Works"
+        "PWD 1"
       ),
       createHistory(
         oldDate(15),
@@ -596,7 +596,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Water Leakage",
     description: "Constant water leakage from the main pipeline.",
     status: "In Progress",
-    department: "Water Supply",
+    department: "Supply Department",
     submittedDate: oldDate(5),
     history: [
       createHistory(
@@ -604,7 +604,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Water Supply.",
-        "Water Supply"
+        "Supply Department"
       ),
       createHistory(
         oldDate(2),
@@ -622,7 +622,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Unauthorised Parking",
     description: "Vehicles are parked illegally, blocking the road.",
     status: "Assigned",
-    department: "Police",
+    department: "SP Office Gondia",
     submittedDate: oldDate(3),
     history: [
       createHistory(
@@ -630,7 +630,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Police.",
-        "Police"
+        "SP Office Gondia"
       ),
     ],
     category: "Law & Order",
@@ -642,7 +642,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Lack of Cleanliness in Public Toilet",
     description: "The public toilet near the bus stand is very dirty.",
     status: "Backlog",
-    department: "Sanitation",
+    department: "Nagar Parishad Gondia",
     submittedDate: oldDate(10),
     history: [
       createHistory(
@@ -650,7 +650,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Sanitation.",
-        "Sanitation"
+        "Nagar Parishad Gondia"
       ),
       createHistory(
         oldDate(7),
@@ -668,7 +668,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Illegal Hawkers",
     description: "Illegal hawkers have occupied the footpath.",
     status: "Need Details",
-    department: "Urban Planning",
+    department: "Nagar Parishad Gondia",
     submittedDate: oldDate(8),
     history: [
       createHistory(
@@ -676,7 +676,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Urban Planning.",
-        "Urban Planning"
+        "Nagar Parishad Gondia"
       ),
       createHistory(
         oldDate(6),
@@ -695,7 +695,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "An open manhole on the footpath is dangerous for pedestrians.",
     status: "Resolved",
-    department: "Public Works",
+    department: "PWD 1",
     priority: "High",
     submittedDate: oldDate(6),
     history: [
@@ -704,7 +704,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Urgent action needed.",
-        "Public Works",
+        "PWD 1",
         "High"
       ),
       createHistory(
@@ -740,7 +740,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Frequent Power Cuts",
     description: "Experiencing frequent power cuts in our area.",
     status: "Assigned",
-    department: "Public Works",
+    department: "PWD 1",
     submittedDate: oldDate(4),
     history: [
       createHistory(
@@ -748,7 +748,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to electricity board.",
-        "Public Works"
+        "PWD 1"
       ),
     ],
     category: "Utilities",
@@ -760,7 +760,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Broken Street Sign",
     description: "A street sign is broken and hanging dangerously.",
     status: "In Progress",
-    department: "Public Works",
+    department: "PWD 1",
     submittedDate: oldDate(7),
     history: [
       createHistory(
@@ -768,7 +768,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to PWD.",
-        "Public Works"
+        "PWD 1"
       ),
       createHistory(
         oldDate(4),
@@ -804,7 +804,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Waterlogging issue",
     description: "Waterlogging on the road after rain.",
     status: "Resolved",
-    department: "Public Works",
+    department: "PWD 1",
     submittedDate: oldDate(12),
     history: [
       createHistory(
@@ -812,7 +812,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to PWD.",
-        "Public Works"
+        "PWD 1"
       ),
       createHistory(
         oldDate(9),
@@ -836,7 +836,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Irregular Water Supply",
     description: "Water supply is irregular and at low pressure.",
     status: "Backlog",
-    department: "Water Supply",
+    department: "Supply Department",
     submittedDate: oldDate(14),
     history: [
       createHistory(
@@ -844,7 +844,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Water Supply.",
-        "Water Supply"
+        "Supply Department"
       ),
       createHistory(
         oldDate(11),
@@ -862,7 +862,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Encroachment on footpath",
     description: "A shop has encroached upon the footpath.",
     status: "Assigned",
-    department: "Urban Planning",
+    department: "Nagar Parishad Gondia",
     submittedDate: oldDate(2),
     history: [
       createHistory(
@@ -870,7 +870,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Urban Planning.",
-        "Urban Planning"
+        "Nagar Parishad Gondia"
       ),
     ],
     category: "Encroachment",
@@ -893,7 +893,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Poor condition of health center",
     description: "The local health center is in poor condition.",
     status: "Resolved",
-    department: "Health",
+    department: "Health Department",
     submittedDate: oldDate(25),
     history: [
       createHistory(
@@ -901,7 +901,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Health dept.",
-        "Health"
+        "Health Department"
       ),
       createHistory(
         oldDate(20),
@@ -925,7 +925,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Theft in the area",
     description: "There have been several thefts in our area recently.",
     status: "In Progress",
-    department: "Police",
+    department: "SP Office Gondia",
     submittedDate: oldDate(11),
     history: [
       createHistory(
@@ -933,7 +933,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Police.",
-        "Police"
+        "SP Office Gondia"
       ),
       createHistory(
         oldDate(8),
@@ -951,7 +951,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Lack of street lights",
     description: "No street lights on the road to the village.",
     status: "Need Details",
-    department: "Public Works",
+    department: "PWD 1",
     submittedDate: oldDate(13),
     history: [
       createHistory(
@@ -959,7 +959,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to PWD.",
-        "Public Works"
+        "PWD 1"
       ),
       createHistory(
         oldDate(10),
@@ -977,7 +977,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Damaged electricity pole",
     description: "An electricity pole is damaged and could fall.",
     status: "Assigned",
-    department: "Public Works",
+    department: "PWD 1",
     priority: "High",
     submittedDate: oldDate(1),
     history: [
@@ -986,7 +986,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Urgent. Forwarded to electricity board.",
-        "Public Works",
+        "PWD 1",
         "High"
       ),
     ],
@@ -999,7 +999,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Need for a public library",
     description: "Request to build a public library for students.",
     status: "Backlog",
-    department: "Urban Planning",
+    department: "Nagar Parishad Gondia",
     submittedDate: oldDate(30),
     history: [
       createHistory(
@@ -1007,7 +1007,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Urban Planning.",
-        "Urban Planning"
+        "Nagar Parishad Gondia"
       ),
       createHistory(
         oldDate(25),
@@ -1025,7 +1025,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Blocked sewer line",
     description: "The main sewer line in our street is blocked.",
     status: "Resolved",
-    department: "Sanitation",
+    department: "Nagar Parishad Gondia",
     submittedDate: oldDate(18),
     history: [
       createHistory(
@@ -1033,7 +1033,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Sanitation.",
-        "Sanitation"
+        "Nagar Parishad Gondia"
       ),
       createHistory(
         oldDate(16),
@@ -1068,7 +1068,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Lack of drinking water facility",
     description: "No drinking water facility at the public park.",
     status: "Assigned",
-    department: "Water Supply",
+    department: "Supply Department",
     submittedDate: oldDate(4),
     history: [
       createHistory(
@@ -1076,7 +1076,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Water Supply.",
-        "Water Supply"
+        "Supply Department"
       ),
     ],
     category: "Utilities",
@@ -1088,7 +1088,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Illegal dumping of garbage",
     description: "People are dumping garbage in the open plot.",
     status: "In Progress",
-    department: "Sanitation",
+    department: "Nagar Parishad Gondia",
     submittedDate: oldDate(9),
     history: [
       createHistory(
@@ -1096,7 +1096,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Sanitation.",
-        "Sanitation"
+        "Nagar Parishad Gondia"
       ),
       createHistory(
         oldDate(6),
@@ -1136,7 +1136,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "The traffic signal at the main square is not working properly.",
     status: "Resolved",
-    department: "Police",
+    department: "SP Office Gondia",
     submittedDate: oldDate(22),
     history: [
       createHistory(
@@ -1144,7 +1144,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Traffic Police.",
-        "Police"
+        "Traffic Police"
       ),
       createHistory(
         oldDate(19),
@@ -1169,7 +1169,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "A zebra crossing is needed near the school for children's safety.",
     status: "Backlog",
-    department: "Public Works",
+    department: "PWD 1",
     submittedDate: oldDate(35),
     history: [
       createHistory(
@@ -1177,7 +1177,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to PWD.",
-        "Public Works"
+        "PWD 1"
       ),
       createHistory(
         oldDate(30),
@@ -1195,7 +1195,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Contaminated Water Supply",
     description: "The tap water has a foul smell and is muddy.",
     status: "In Progress",
-    department: "Water Supply",
+    department: "Supply Department",
     priority: "High",
     submittedDate: oldDate(3),
     history: [
@@ -1204,7 +1204,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Urgent. Forwarded to Water Supply.",
-        "Water Supply",
+        "Supply Department",
         "High"
       ),
       createHistory(
@@ -1224,7 +1224,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "A factory in the residential area is causing a lot of noise pollution.",
     status: "Assigned",
-    department: "Urban Planning",
+    department: "Nagar Parishad Gondia",
     submittedDate: oldDate(5),
     history: [
       createHistory(
@@ -1232,7 +1232,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Urban Planning & Pollution Control.",
-        "Urban Planning"
+        "Nagar Parishad Gondia"
       ),
     ],
     category: "Environment",
@@ -1256,7 +1256,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "Essential medicines are not available at the primary health center.",
     status: "Resolved",
-    department: "Health",
+    department: "Health Department",
     submittedDate: oldDate(28),
     history: [
       createHistory(
@@ -1264,7 +1264,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Health dept.",
-        "Health"
+        "Health Department"
       ),
       createHistory(
         oldDate(26),
@@ -1288,7 +1288,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Gambling in public place",
     description: "People are gambling openly in the public garden.",
     status: "Need Details",
-    department: "Police",
+    department: "SP Office Gondia",
     submittedDate: oldDate(15),
     history: [
       createHistory(
@@ -1296,7 +1296,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Police.",
-        "Police"
+        "SP Office Gondia"
       ),
       createHistory(
         oldDate(13),
@@ -1332,7 +1332,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Wild animal menace",
     description: "Wild boars are destroying crops in our fields.",
     status: "Assigned",
-    department: "Police",
+    department: "SP Office Gondia",
     submittedDate: oldDate(6),
     history: [
       createHistory(
@@ -1340,7 +1340,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Forest Department via Police liaison.",
-        "Police"
+        "SP Office Gondia"
       ),
     ],
     category: "Agriculture",
@@ -1363,7 +1363,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "School building in bad condition",
     description: "The local government school building needs urgent repairs.",
     status: "In Progress",
-    department: "Public Works",
+    department: "PWD 1",
     priority: "High",
     submittedDate: oldDate(19),
     history: [
@@ -1372,7 +1372,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to PWD.",
-        "Public Works",
+        "PWD 1",
         "High"
       ),
       createHistory(
@@ -1391,7 +1391,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Illegal sand mining",
     description: "Illegal sand mining is happening on the river bank.",
     status: "Resolved",
-    department: "Police",
+    department: "SP Office Gondia",
     submittedDate: oldDate(50),
     history: [
       createHistory(
@@ -1399,7 +1399,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Police and Revenue Dept.",
-        "Police"
+        "SP Office Gondia"
       ),
       createHistory(
         oldDate(45),
@@ -1423,7 +1423,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Delay in pension disbursement",
     description: "Senior citizen pensions have been delayed this month.",
     status: "Backlog",
-    department: "Sanitation", // Incorrect, but for testing
+    department: "Nagar Parishad Gondia", // Incorrect, but for testing
     submittedDate: oldDate(23),
     history: [
       createHistory(
@@ -1431,7 +1431,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Treasury.",
-        "Sanitation"
+        "Nagar Parishad Gondia"
       ), // Wrong dept
       createHistory(
         oldDate(20),
@@ -1449,7 +1449,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Need for more public buses",
     description: "The number of public buses is not enough for the population.",
     status: "Assigned",
-    department: "Urban Planning",
+    department: "Nagar Parishad Gondia",
     submittedDate: oldDate(17),
     history: [
       createHistory(
@@ -1457,7 +1457,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Transport Dept.",
-        "Urban Planning"
+        "Nagar Parishad Gondia"
       ),
     ],
     category: "Transport",
@@ -1469,7 +1469,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Non-functional hand pump",
     description: "The community hand pump is not working.",
     status: "Resolved",
-    department: "Water Supply",
+    department: "Supply Department",
     submittedDate: oldDate(4),
     history: [
       createHistory(
@@ -1477,7 +1477,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Water Supply.",
-        "Water Supply"
+        "Supply Department"
       ),
       createHistory(
         oldDate(2),
@@ -1501,7 +1501,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Rude behavior of hospital staff",
     description: "The staff at the government hospital were very rude.",
     status: "In Progress",
-    department: "Health",
+    department: "Health Department",
     submittedDate: oldDate(8),
     history: [
       createHistory(
@@ -1509,7 +1509,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Hospital Superintendent.",
-        "Health"
+        "Health Department"
       ),
       createHistory(
         oldDate(5),
@@ -1539,7 +1539,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "The ration shop owner is charging more than the government price.",
     status: "Resolved",
-    department: "Urban Planning", // incorrect
+    department: "Nagar Parishad Gondia", // incorrect
     submittedDate: oldDate(33),
     history: [
       createHistory(
@@ -1547,7 +1547,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Food Supply Officer.",
-        "Urban Planning"
+        "Nagar Parishad Gondia"
       ),
       createHistory(
         oldDate(30),
@@ -1571,7 +1571,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Dangerous electric wires",
     description: "Low-hanging electric wires are a safety hazard.",
     status: "Backlog",
-    department: "Public Works",
+    department: "PWD 1",
     priority: "High",
     submittedDate: oldDate(26),
     history: [
@@ -1580,7 +1580,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Urgent. Forwarded to Electricity Board.",
-        "Public Works",
+        "PWD 1",
         "High"
       ),
       createHistory(
@@ -1599,7 +1599,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Request for new Anganwadi center",
     description: "Our village needs an Anganwadi center for child development.",
     status: "Assigned",
-    department: "Health",
+    department: "Health Department",
     submittedDate: oldDate(19),
     history: [
       createHistory(
@@ -1607,7 +1607,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Women and Child Development Officer.",
-        "Health"
+        "Health Department"
       ),
     ],
     category: "Social Welfare",
@@ -1620,7 +1620,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     description:
       "Mosquitoes have increased a lot in our area. Fogging is needed.",
     status: "Resolved",
-    department: "Sanitation",
+    department: "Nagar Parishad Gondia",
     submittedDate: oldDate(6),
     history: [
       createHistory(
@@ -1628,7 +1628,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Sanitation.",
-        "Sanitation"
+        "Nagar Parishad Gondia"
       ),
       createHistory(
         oldDate(4),
@@ -1652,7 +1652,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Rash driving by bikers",
     description: "Youngsters are driving bikes very rashly in the evening.",
     status: "In Progress",
-    department: "Police",
+    department: "SP Office Gondia",
     submittedDate: oldDate(1),
     history: [
       createHistory(
@@ -1660,7 +1660,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Traffic Police.",
-        "Police"
+        "Traffic Police"
       ),
     ],
     category: "Law & Order",
@@ -1672,7 +1672,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
     title: "Fake currency circulation",
     description: "A shopkeeper gave me a fake 500 rupee note.",
     status: "Need Details",
-    department: "Police",
+    department: "SP Office Gondia",
     submittedDate: oldDate(21),
     history: [
       createHistory(
@@ -1680,7 +1680,7 @@ const rawComplaints: Omit<Complaint, "lastUpdated">[] = [
         "Collector Team",
         "Complaint Assigned",
         "Forwarded to Police.",
-        "Police"
+        "SP Office Gondia"
       ),
       createHistory(
         oldDate(19),

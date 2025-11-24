@@ -469,7 +469,8 @@ const getStatusOptionsForRole = (
       return ["Reopen"];
   }
   if (userRole === "Department Team") {
-    if (currentStatus === "Assigned") return ["In Progress", "Need Details"];
+    if (currentStatus === "Assigned")
+      return ["In Progress", "Resolved", "Need Details"];
     if (currentStatus === "In Progress")
       return ["Resolved", "Backlog", "Need Details"];
     if (currentStatus === "Backlog") return ["In Progress", "Reopen"];

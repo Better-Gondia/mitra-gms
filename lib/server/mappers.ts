@@ -35,18 +35,18 @@ const deptMapToUI = (
 ): UIComplaint["department"] | undefined => {
   if (!dept) return undefined;
   switch (dept) {
-    case "PUBLIC_WORKS":
-      return "Public Works";
-    case "WATER_SUPPLY":
-      return "Water Supply";
-    case "SANITATION":
-      return "Sanitation";
-    case "HEALTH":
-      return "Health";
-    case "URBAN_PLANNING":
-      return "Urban Planning";
-    case "POLICE":
-      return "Police";
+    // case "PUBLIC_WORKS":
+    //   return "Public Works";
+    // case "WATER_SUPPLY":
+    //   return "Water Supply";
+    // case "SANITATION":
+    //   return "Sanitation";
+    // case "HEALTH":
+    //   return "Health";
+    // case "URBAN_PLANNING":
+    //   return "Urban Planning";
+    // case "POLICE":
+    //   return "Police";
     case "PWD_1":
       return "PWD 1";
     case "PWD_2":
@@ -90,18 +90,18 @@ const deptMapToDB = (
   dept: UIComplaint["department"] | undefined
 ): DBDepartment | null => {
   switch (dept) {
-    case "Public Works":
-      return "PUBLIC_WORKS";
-    case "Water Supply":
-      return "WATER_SUPPLY";
-    case "Sanitation":
-      return "SANITATION";
-    case "Health":
-      return "HEALTH";
-    case "Urban Planning":
-      return "URBAN_PLANNING";
-    case "Police":
-      return "POLICE";
+    // case "Public Works":
+    //   return "PUBLIC_WORKS";
+    // case "Water Supply":
+    //   return "WATER_SUPPLY";
+    // case "Sanitation":
+    //   return "SANITATION";
+    // case "Health":
+    //   return "HEALTH";
+    // case "Urban Planning":
+    //   return "URBAN_PLANNING";
+    // case "Police":
+    //   return "POLICE";
     case "PWD 1":
       return "PWD_1";
     case "PWD 2":
