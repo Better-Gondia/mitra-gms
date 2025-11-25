@@ -60,6 +60,10 @@ export async function POST(req: NextRequest) {
       "FOREST_OFFICE_GONDIA",
       "SAMAJ_KALYAN_OFFICE_GONDIA",
       "SLR_OFFICE_GONDIA",
+      "RDC_GONDIA",
+      "DEPUTY_COLLECTOR_GENERAL_GONDIA",
+      "PO_OFFICE_DEORI",
+      "ST_DEPO_OFFICE_GONDIA",
     ];
     if (!allowedRoles.includes(user.role)) {
       return NextResponse.json(
@@ -193,6 +197,10 @@ export async function GET(req: NextRequest) {
       "FOREST_OFFICE_GONDIA",
       "SAMAJ_KALYAN_OFFICE_GONDIA",
       "SLR_OFFICE_GONDIA",
+      "RDC_GONDIA",
+      "DEPUTY_COLLECTOR_GENERAL_GONDIA",
+      "PO_OFFICE_DEORI",
+      "ST_DEPO_OFFICE_GONDIA",
     ].includes(user?.role || "");
 
     const remarks = await prisma.remark.findMany({

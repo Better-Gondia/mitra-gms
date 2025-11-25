@@ -81,6 +81,14 @@ const deptMapToUI = (
       return "Samaj Kalyan Office Gondia";
     case "SLR_OFFICE_GONDIA":
       return "SLR Office Gondia";
+    case "RDC_GONDIA":
+      return "RDC Gondia";
+    case "DEPUTY_COLLECTOR_GENERAL_GONDIA":
+      return "Deputy Collector General Gondia";
+    case "PO_OFFICE_DEORI":
+      return "PO Office Deori";
+    case "ST_DEPO_OFFICE_GONDIA":
+      return "ST Depo Office Gondia";
     default:
       return undefined;
   }
@@ -136,6 +144,14 @@ const deptMapToDB = (
       return "SAMAJ_KALYAN_OFFICE_GONDIA";
     case "SLR Office Gondia":
       return "SLR_OFFICE_GONDIA";
+    case "RDC Gondia":
+      return "RDC_GONDIA";
+    case "Deputy Collector General Gondia":
+      return "DEPUTY_COLLECTOR_GENERAL_GONDIA";
+    case "PO Office Deori":
+      return "PO_OFFICE_DEORI";
+    case "ST Depo Office Gondia":
+      return "ST_DEPO_OFFICE_GONDIA";
     default:
       return null;
   }
@@ -183,6 +199,10 @@ const roleMapToUI: Record<DBRole, UserRole> = {
   FOREST_OFFICE_GONDIA: "Department Team",
   SAMAJ_KALYAN_OFFICE_GONDIA: "Department Team",
   SLR_OFFICE_GONDIA: "Department Team",
+  RDC_GONDIA: "Department Team",
+  DEPUTY_COLLECTOR_GENERAL_GONDIA: "Department Team",
+  PO_OFFICE_DEORI: "Department Team",
+  ST_DEPO_OFFICE_GONDIA: "Department Team",
 };
 
 function generateComplaintIdFromDate(

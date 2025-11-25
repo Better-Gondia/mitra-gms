@@ -54,6 +54,13 @@ enum Role {
   FOREST_OFFICE_GONDIA //	gondiaforestoffice@gmail.com
   SAMAJ_KALYAN_OFFICE_GONDIA //	gondiasamajkalyan@gmail.com
   SLR_OFFICE_GONDIA //	gondialandrecordsuprident@gmail.com
+  
+  // New Departments Roles added: 24-11-2025
+  RDC_GONDIA //gondiaresidentdeputycollector@gmail.com
+  DEPUTY_COLLECTOR_GENERAL_GONDIA // gondiadcgenaral@gmail.com
+  PO_OFFICE_DEORI // deoripooffice@gmail.com
+  ST_DEPO_OFFICE_GONDIA // gondiastmahamandal@gmail.com
+
 
   // Collector office 	gondiaresidentdeputycollector@gmail.com
 }
@@ -103,6 +110,12 @@ enum Department {
   FOREST_OFFICE_GONDIA //	gondiaforestoffice@gmail.com
   SAMAJ_KALYAN_OFFICE_GONDIA //	gondiasamajkalyan@gmail.com
   SLR_OFFICE_GONDIA //	gondialandrecordsuprident@gmail.com
+  
+  // New Departments Roles added: 24-11-2025
+  RDC_GONDIA //gondiaresidentdeputycollector@gmail.com
+  DEPUTY_COLLECTOR_GENERAL_GONDIA // gondiadcgenaral@gmail.com
+  PO_OFFICE_DEORI // deoripooffice@gmail.com
+  ST_DEPO_OFFICE_GONDIA // gondiastmahamandal@gmail.com
 }
 
 enum Language {

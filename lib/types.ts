@@ -67,6 +67,10 @@ export const departments = [
   "Forest Office Gondia",
   "Samaj Kalyan Office Gondia",
   "SLR Office Gondia",
+  "RDC Gondia",
+  "Deputy Collector General Gondia",
+  "PO Office Deori",
+  "ST Depo Office Gondia",
 ] as const;
 export type Department = (typeof departments)[number];
 

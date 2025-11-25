@@ -63,6 +63,10 @@ const dbRoleToUIRole: Record<DBRole, UserRole> = {
   FOREST_OFFICE_GONDIA: "Department Team",
   SAMAJ_KALYAN_OFFICE_GONDIA: "Department Team",
   SLR_OFFICE_GONDIA: "Department Team",
+  RDC_GONDIA: "Department Team",
+  DEPUTY_COLLECTOR_GENERAL_GONDIA: "Department Team",
+  PO_OFFICE_DEORI: "Department Team",
+  ST_DEPO_OFFICE_GONDIA: "Department Team",
 };
 
 export function RoleProvider({ children }: { children: React.ReactNode }) {

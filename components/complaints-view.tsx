@@ -1791,7 +1791,6 @@ export default function ComplaintsView({
                 />
 
                 {(role === "District Collector" ||
-                  role === "Department Team" ||
                   stakeholderRoles.includes(role as any)) && (
                   <SearchableSelect
                     options={departments}

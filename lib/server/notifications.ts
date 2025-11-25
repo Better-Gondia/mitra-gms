@@ -149,6 +149,10 @@ function getDepartmentName(department: Department | null): string {
     FOREST_OFFICE_GONDIA: "Forest Office Gondia",
     SAMAJ_KALYAN_OFFICE_GONDIA: "Samaj Kalyan Office Gondia",
     SLR_OFFICE_GONDIA: "SLR Office Gondia",
+    RDC_GONDIA: "RDC Gondia",
+    DEPUTY_COLLECTOR_GENERAL_GONDIA: "Deputy Collector General Gondia",
+    PO_OFFICE_DEORI: "PO Office Deori",
+    ST_DEPO_OFFICE_GONDIA: "ST Depo Office Gondia",
   };
   return deptMap[department] || "";
 }
@@ -185,6 +189,10 @@ function getDepartmentRoleFromDepartment(department: Department | null): Role {
     FOREST_OFFICE_GONDIA: "FOREST_OFFICE_GONDIA",
     SAMAJ_KALYAN_OFFICE_GONDIA: "SAMAJ_KALYAN_OFFICE_GONDIA",
     SLR_OFFICE_GONDIA: "SLR_OFFICE_GONDIA",
+    RDC_GONDIA: "RDC_GONDIA",
+    DEPUTY_COLLECTOR_GENERAL_GONDIA: "DEPUTY_COLLECTOR_GENERAL_GONDIA",
+    PO_OFFICE_DEORI: "PO_OFFICE_DEORI",
+    ST_DEPO_OFFICE_GONDIA: "ST_DEPO_OFFICE_GONDIA",
   };
 
   return deptToRoleMap[department] || "DEPARTMENT_TEAM";

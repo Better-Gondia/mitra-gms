@@ -188,6 +188,10 @@ export async function PATCH(
         "FOREST_OFFICE_GONDIA",
         "SAMAJ_KALYAN_OFFICE_GONDIA",
         "SLR_OFFICE_GONDIA",
+        "RDC_GONDIA",
+        "DEPUTY_COLLECTOR_GENERAL_GONDIA",
+        "PO_OFFICE_DEORI",
+        "ST_DEPO_OFFICE_GONDIA",
       ];
 
       if (allowedRoles.includes(user.role)) {
