@@ -393,6 +393,10 @@ const getRoleDisplayName = (dbRole: string | undefined): string => {
     DEPUTY_COLLECTOR_GENERAL_GONDIA: "Deputy Collector General Gondia",
     PO_OFFICE_DEORI: "PO Office Deori",
     ST_DEPO_OFFICE_GONDIA: "ST Depo Office Gondia",
+    NAGAR_PANCHAYAT_SALEKASA: "Nagar Panchayat Salekasa",
+    NAGAR_PANCHAYAT_DEORI: "Nagar Panchayat Deori",
+    NAGAR_PANCHAYAT_ARJUNI_MOR: "Nagar Panchayat Arjuni Mor",
+    NAGAR_PANCHAYAT_SADAK_ARJUNI: "Nagar Panchayat Sadak Arjuni",
   };
   return dbRoleToUIRole[dbRole || "USER"] || "Citizen";
 };

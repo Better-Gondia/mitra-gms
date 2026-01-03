@@ -89,6 +89,14 @@ const deptMapToUI = (
       return "PO Office Deori";
     case "ST_DEPO_OFFICE_GONDIA":
       return "ST Depo Office Gondia";
+    case "NAGAR_PANCHAYAT_SALEKASA":
+      return "Nagar Panchayat Salekasa";
+    case "NAGAR_PANCHAYAT_DEORI":
+      return "Nagar Panchayat Deori";
+    case "NAGAR_PANCHAYAT_ARJUNI_MOR":
+      return "Nagar Panchayat Arjuni Mor";
+    case "NAGAR_PANCHAYAT_SADAK_ARJUNI":
+      return "Nagar Panchayat Sadak Arjuni";
     default:
       return undefined;
   }
@@ -152,6 +160,14 @@ const deptMapToDB = (
       return "PO_OFFICE_DEORI";
     case "ST Depo Office Gondia":
       return "ST_DEPO_OFFICE_GONDIA";
+    case "Nagar Panchayat Salekasa":
+      return "NAGAR_PANCHAYAT_SALEKASA";
+    case "Nagar Panchayat Deori":
+      return "NAGAR_PANCHAYAT_DEORI";
+    case "Nagar Panchayat Arjuni Mor":
+      return "NAGAR_PANCHAYAT_ARJUNI_MOR";
+    case "Nagar Panchayat Sadak Arjuni":
+      return "NAGAR_PANCHAYAT_SADAK_ARJUNI";
     default:
       return null;
   }
@@ -203,6 +219,10 @@ const roleMapToUI: Record<DBRole, UserRole> = {
   DEPUTY_COLLECTOR_GENERAL_GONDIA: "Department Team",
   PO_OFFICE_DEORI: "Department Team",
   ST_DEPO_OFFICE_GONDIA: "Department Team",
+  NAGAR_PANCHAYAT_SALEKASA: "Department Team",
+  NAGAR_PANCHAYAT_DEORI: "Department Team",
+  NAGAR_PANCHAYAT_ARJUNI_MOR: "Department Team",
+  NAGAR_PANCHAYAT_SADAK_ARJUNI: "Department Team",
 };
 
 function generateComplaintIdFromDate(

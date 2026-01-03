@@ -57,12 +57,8 @@ export function useComplaintsWithFilters({
     if (!filters.statusFilter || filters.statusFilter === "all") {
       if (role === "Department Team") {
         params.statuses = "Assigned,In Progress,Resolved,Backlog";
-      } else if (
-        role === "Collector Team" ||
-        role === "Collector Team Advanced"
-      ) {
-        params.statuses = "Open,Need Details,Invalid";
       }
+      // Collector Team, Collector Team Advanced, and District Collector see all statuses (no restriction)
     }
     // Note: Department filtering by role is handled server-side in app/api/complaints/route.ts
     if (filters.departmentFilter && filters.departmentFilter !== "all") {
@@ -93,12 +89,11 @@ export function useComplaintsWithFilters({
     const isComplaintVisibleInRole = (complaint: Complaint) => {
       if (
         role === "District Collector" ||
+        role === "Collector Team" ||
+        role === "Collector Team Advanced" ||
         stakeholderRoles.includes(role as any)
       ) {
         return true;
-      }
-      if (role === "Collector Team" || role === "Collector Team Advanced") {
-        return ["Open", "Need Details", "Invalid"].includes(complaint.status);
       }
       if (role === "Department Team") {
         return ["Assigned", "In Progress", "Resolved", "Backlog"].includes(
@@ -199,12 +194,11 @@ export function useComplaintsWithFilters({
     const isComplaintVisibleInRole = (complaint: Complaint) => {
       if (
         role === "District Collector" ||
+        role === "Collector Team" ||
+        role === "Collector Team Advanced" ||
         stakeholderRoles.includes(role as any)
       ) {
         return true;
-      }
-      if (role === "Collector Team" || role === "Collector Team Advanced") {
-        return ["Open", "Need Details", "Invalid"].includes(complaint.status);
       }
       if (role === "Department Team") {
         return ["Assigned", "In Progress", "Resolved", "Backlog"].includes(

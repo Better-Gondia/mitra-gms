@@ -26,7 +26,7 @@ enum Role {
   DISTRICT_COLLECTOR
   SUPERINTENDENT_OF_POLICE // SAME AS DISTRICT_COLLECTOR
   MP_RAJYA_SABHA // SAME AS DISTRICT_COLLECTOR
-  MP_LOK_SABHA 
+  MP_LOK_SABHA
   MLA_GONDIA
   MLA_TIRORA
   MLA_ARJUNI_MORGAON
@@ -35,12 +35,12 @@ enum Role {
   ZP_CEO
   IFS
 
-// Department Roles
+  // Department Roles
   DEPARTMENT_TEAM
   PWD_1 // no1	gondiapwd@gmail.com
   PWD_2 // no2	gondiapwd2@gmail.com
-  RTO 	// gondiartooffice@gmail.com
-  ZILLA_PARISHAD 	// gondiazillaparishad@gmail.com
+  RTO // gondiartooffice@gmail.com
+  ZILLA_PARISHAD // gondiazillaparishad@gmail.com
   SP_OFFICE_GONDIA //	gondiaspoffice@gmail.com
   SUPPLY_DEPARTMENT //	gondiadistrictsupplyoffice@gmail.com
   HEALTH_DEPARTMENT // 	districthealthofficezillaparis@gmail.com
@@ -49,20 +49,25 @@ enum Role {
   NAGAR_PARISHAD_TIRORA //	co.tiroda@gmail.com
   NAGAR_PARISHAD_GONDIA //	co.gondia1@gmail.com
   NAGAR_PARISHAD_AMGAON //	co.amgaon@gmail.com
-  NAGAR_PARISHAD_GOREGAON	// co.goregaon1@gmail.com
+  NAGAR_PARISHAD_GOREGAON // co.goregaon1@gmail.com
   DEAN_MEDICAL_COLLEGE_GONDIA //	gondiadeanmedicalcollege@gmail.com
   FOREST_OFFICE_GONDIA //	gondiaforestoffice@gmail.com
   SAMAJ_KALYAN_OFFICE_GONDIA //	gondiasamajkalyan@gmail.com
   SLR_OFFICE_GONDIA //	gondialandrecordsuprident@gmail.com
-  
+
   // New Departments Roles added: 24-11-2025
   RDC_GONDIA //gondiaresidentdeputycollector@gmail.com
   DEPUTY_COLLECTOR_GENERAL_GONDIA // gondiadcgenaral@gmail.com
   PO_OFFICE_DEORI // deoripooffice@gmail.com
   ST_DEPO_OFFICE_GONDIA // gondiastmahamandal@gmail.com
 
-
   // Collector office 	gondiaresidentdeputycollector@gmail.com
+
+  // New Departments roles added: 3-1-2026
+  NAGAR_PANCHAYAT_SALEKASA // Nagar Panchayat Salekasa - npsalekasa7@gmail.com
+  NAGAR_PANCHAYAT_DEORI // Nagar Panchayat Deori -   npdeori7@gmail.com
+  NAGAR_PANCHAYAT_ARJUNI_MOR // Nagar Panchayat Arjuni Mor - nparjunimor@gmail.com
+  NAGAR_PANCHAYAT_SADAK_ARJUNI // Nagaar Panchatyat Sadak Arjuni - npsadakarjuni59@gmail.com 
 }
 
 enum AuthType {
@@ -95,8 +100,8 @@ enum Department {
 
   PWD_1 // no1	gondiapwd@gmail.com
   PWD_2 // no2	gondiapwd2@gmail.com
-  RTO 	// gondiartooffice@gmail.com
-  ZILLA_PARISHAD 	// gondiazillaparishad@gmail.com
+  RTO // gondiartooffice@gmail.com
+  ZILLA_PARISHAD // gondiazillaparishad@gmail.com
   SP_OFFICE_GONDIA //	gondiaspoffice@gmail.com
   SUPPLY_DEPARTMENT //	gondiadistrictsupplyoffice@gmail.com
   HEALTH_DEPARTMENT // 	districthealthofficezillaparis@gmail.com
@@ -105,17 +110,23 @@ enum Department {
   NAGAR_PARISHAD_TIRORA //	co.tiroda@gmail.com
   NAGAR_PARISHAD_GONDIA //	co.gondia1@gmail.com
   NAGAR_PARISHAD_AMGAON //	co.amgaon@gmail.com
-  NAGAR_PARISHAD_GOREGAON	// co.goregaon1@gmail.com
+  NAGAR_PARISHAD_GOREGAON // co.goregaon1@gmail.com
   DEAN_MEDICAL_COLLEGE_GONDIA //	gondiadeanmedicalcollege@gmail.com
   FOREST_OFFICE_GONDIA //	gondiaforestoffice@gmail.com
   SAMAJ_KALYAN_OFFICE_GONDIA //	gondiasamajkalyan@gmail.com
   SLR_OFFICE_GONDIA //	gondialandrecordsuprident@gmail.com
-  
+
   // New Departments Roles added: 24-11-2025
   RDC_GONDIA //gondiaresidentdeputycollector@gmail.com
   DEPUTY_COLLECTOR_GENERAL_GONDIA // gondiadcgenaral@gmail.com
   PO_OFFICE_DEORI // deoripooffice@gmail.com
   ST_DEPO_OFFICE_GONDIA // gondiastmahamandal@gmail.com
+
+  // New Departments roles added: 3-1-2026
+  NAGAR_PANCHAYAT_SALEKASA // Nagar Panchayat Salekasa - npsalekasa7@gmail.com
+  NAGAR_PANCHAYAT_DEORI // Nagar Panchayat Deori -   npdeori7@gmail.com
+  NAGAR_PANCHAYAT_ARJUNI_MOR // Nagar Panchayat Arjuni Mor - nparjunimor@gmail.com
+  NAGAR_PANCHAYAT_SADAK_ARJUNI // Nagaar Panchatyat Sadak Arjuni - npsadakarjuni59@gmail.com 
 }
 
 enum Language {
@@ -181,27 +192,27 @@ enum NotificationType {
 /// -------------------------
 
 model User {
-  id       Int      @id @default(autoincrement())
-  name     String
-  age      Int?
-  gender   Gender?
-  role     Role     @default(USER)
-  slug     String   @unique
-  mobile   String   @unique
-  email    String?  @unique
-  address  String?
-  authType AuthType @default(DETAILS)
-  hasNotifications Boolean @default(false)
+  id               Int      @id @default(autoincrement())
+  name             String
+  age              Int?
+  gender           Gender?
+  role             Role     @default(USER)
+  slug             String   @unique
+  mobile           String   @unique
+  email            String?  @unique
+  address          String?
+  authType         AuthType @default(DETAILS)
+  hasNotifications Boolean  @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  complaints   Complaint[]
-  interactions Interaction[]
-  bugs         Bug[]
-  history      ComplaintHistory[]
-  remarks         Remark[]
-  createdNotifications Notification[] @relation("NotificationCreator")
+  complaints           Complaint[]
+  interactions         Interaction[]
+  bugs                 Bug[]
+  history              ComplaintHistory[]
+  remarks              Remark[]
+  createdNotifications Notification[]     @relation("NotificationCreator")
 
   @@index([mobile])
   @@index([email])
@@ -235,18 +246,18 @@ model Complaint {
   coSignCount        Int      @default(0)
   reportCount        Int      @default(0)
   linkedComplaintIds String[] @default([])
-  
+
   // Split and merge fields
-  displayId          String?  // For split IDs like "25-1", "25-2"
-  parentComplaintId  Int?     // Original complaint for splits
-  splitIndex         Int?     // Track split order
-  mergedIntoComplaintId Int?  // Track merged complaints
-  originalComplaintIds Int[]  @default([]) // Source complaints in merged case
-  isSplit            Boolean  @default(false)
-  isMerged           Boolean  @default(false)
-  
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  displayId             String? // For split IDs like "25-1", "25-2"
+  parentComplaintId     Int? // Original complaint for splits
+  splitIndex            Int? // Track split order
+  mergedIntoComplaintId Int? // Track merged complaints
+  originalComplaintIds  Int[]   @default([]) // Source complaints in merged case
+  isSplit               Boolean @default(false)
+  isMerged              Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   history       ComplaintHistory[]
   interactions  Interaction[]
@@ -263,11 +274,11 @@ model Complaint {
 }
 
 model ComplaintHistory {
-  id          Int       @id @default(autoincrement())
+  id          Int              @id @default(autoincrement())
   complaintId Int
-  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  complaint   Complaint        @relation(fields: [complaintId], references: [id], onDelete: Cascade)
   userId      Int
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   role        Role
   action      String
   notes       String?
@@ -275,7 +286,7 @@ model ComplaintHistory {
   eta         DateTime?
   oldStatus   ComplaintStatus?
   newStatus   ComplaintStatus?
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime         @default(now())
 
   @@index([complaintId])
   @@index([userId])
@@ -354,14 +365,14 @@ model StatusUpdate {
 }
 
 model Notification {
-  id             Int              @id @default(autoincrement())
-  forRole         Role
-  type            NotificationType
-  title           String
-  message         String?
-  createdBy       Int?
-  createdByUser   User?            @relation("NotificationCreator", fields: [createdBy], references: [id], onDelete: SetNull)
-  createdAt       DateTime         @default(now())
+  id            Int              @id @default(autoincrement())
+  forRole       Role
+  type          NotificationType
+  title         String
+  message       String?
+  createdBy     Int?
+  createdByUser User?            @relation("NotificationCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  createdAt     DateTime         @default(now())
 
   @@index([forRole])
   @@index([createdAt])

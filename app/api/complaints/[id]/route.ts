@@ -192,6 +192,10 @@ export async function PATCH(
         "DEPUTY_COLLECTOR_GENERAL_GONDIA",
         "PO_OFFICE_DEORI",
         "ST_DEPO_OFFICE_GONDIA",
+        "NAGAR_PANCHAYAT_SALEKASA",
+        "NAGAR_PANCHAYAT_DEORI",
+        "NAGAR_PANCHAYAT_ARJUNI_MOR",
+        "NAGAR_PANCHAYAT_SADAK_ARJUNI",
       ];
 
       if (allowedRoles.includes(user.role)) {

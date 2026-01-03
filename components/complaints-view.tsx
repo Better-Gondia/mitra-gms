@@ -449,8 +449,12 @@ const getStatusOptionsForRole = (
   currentStatus: ComplaintStatus,
   userRole: UserRole
 ): (ComplaintStatus | "Reopen" | "Assign")[] => {
-  // District Collector can change status to any value
-  if (userRole === "District Collector") {
+  // District Collector, Collector Team, and Collector Team Advanced can change status to any value
+  if (
+    userRole === "District Collector" ||
+    userRole === "Collector Team" ||
+    userRole === "Collector Team Advanced"
+  ) {
     return [
       "Open",
       "In Progress",
@@ -461,12 +465,6 @@ const getStatusOptionsForRole = (
       "Assign",
       "Reopen",
     ];
-  }
-  if (userRole === "Collector Team" || userRole === "Collector Team Advanced") {
-    if (currentStatus === "Open") return ["Assign", "Invalid", "Need Details"];
-    if (currentStatus === "Need Details") return ["Open", "Assign"];
-    if (["Resolved", "Invalid", "Backlog"].includes(currentStatus))
-      return ["Reopen"];
   }
   if (userRole === "Department Team") {
     if (currentStatus === "Assigned")
@@ -898,12 +896,14 @@ export default function ComplaintsView({
   };
 
   const getStatusOptions = () => {
-    if (role === "District Collector" || stakeholderRoles.includes(role as any))
+    if (
+      role === "District Collector" ||
+      role === "Collector Team" ||
+      role === "Collector Team Advanced" ||
+      stakeholderRoles.includes(role as any)
+    )
       return allStatuses;
     switch (role) {
-      case "Collector Team":
-      case "Collector Team Advanced":
-        return collectorStatuses;
       case "Department Team":
         return departmentStatuses;
       default:
@@ -1209,15 +1209,14 @@ export default function ComplaintsView({
   const getKpiGridClass = (role: UserRole): string => {
     if (
       role === "District Collector" ||
+      role === "Collector Team" ||
+      role === "Collector Team Advanced" ||
       stakeholderRoles.includes(role as any)
     ) {
       return "grid-cols-2 sm:grid-cols-4 lg:grid-cols-8";
     }
     if (role === "Department Team") {
       return "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5";
-    }
-    if (role === "Collector Team" || role === "Collector Team Advanced") {
-      return "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4";
     }
     return `grid-cols-2 sm:grid-cols-4 lg:grid-cols-8`;
   };
@@ -1246,8 +1245,12 @@ export default function ComplaintsView({
         possibleActions: getStatusOptionsForRole(firstStatus, role),
       };
     }
-    // District Collector can change status even when statuses are mixed
-    if (role === "District Collector") {
+    // District Collector, Collector Team, and Collector Team Advanced can change status even when statuses are mixed
+    if (
+      role === "District Collector" ||
+      role === "Collector Team" ||
+      role === "Collector Team Advanced"
+    ) {
       return {
         commonStatus: "mixed",
         possibleActions: [
@@ -1442,6 +1445,8 @@ export default function ComplaintsView({
     let orderedStatuses: (keyof typeof allKpis)[];
     if (
       role === "District Collector" ||
+      role === "Collector Team" ||
+      role === "Collector Team Advanced" ||
       stakeholderRoles.includes(role as any)
     ) {
       orderedStatuses = [
@@ -1463,7 +1468,6 @@ export default function ComplaintsView({
         "Backlog",
       ];
     } else {
-      // Collector Team
       orderedStatuses = ["all", "Open", "Need Details", "Invalid"];
     }
 

@@ -1387,8 +1387,12 @@ export default function ComplaintsTable({
     currentStatus: ComplaintStatus,
     userRole: UserRole
   ): (ComplaintStatus | "Assign")[] => {
-    // District Collector can change status to any value
-    if (userRole === "District Collector") {
+    // District Collector, Collector Team, and Collector Team Advanced can change status to any value
+    if (
+      userRole === "District Collector" ||
+      userRole === "Collector Team" ||
+      userRole === "Collector Team Advanced"
+    ) {
       return [
         "Open",
         "In Progress",
@@ -1398,14 +1402,6 @@ export default function ComplaintsTable({
         "Invalid",
         "Assign",
       ];
-    }
-    if (
-      userRole === "Collector Team" ||
-      userRole === "Collector Team Advanced"
-    ) {
-      if (currentStatus === "Open")
-        return ["Assign", "Invalid", "Need Details"];
-      if (currentStatus === "Need Details") return ["Open", "Assign"];
     }
     if (userRole === "Department Team") {
       if (currentStatus === "Assigned")
@@ -1418,7 +1414,12 @@ export default function ComplaintsTable({
   };
 
   const isActionable = (status: ComplaintStatus, role: UserRole) => {
-    if (role === "District Collector") return true;
+    if (
+      role === "District Collector" ||
+      role === "Collector Team" ||
+      role === "Collector Team Advanced"
+    )
+      return true;
     if (stakeholderRoles.includes(role as any)) {
       return (
         !["Resolved", "Invalid"].includes(status) ||
@@ -1429,9 +1430,7 @@ export default function ComplaintsTable({
     if (!["Resolved", "Invalid"].includes(status)) return true;
     if (
       ["Resolved", "Invalid", "Backlog"].includes(status) &&
-      (role === "Collector Team" ||
-        role === "Collector Team Advanced" ||
-        role === "Department Team")
+      role === "Department Team"
     )
       return true;
 
@@ -2012,9 +2011,10 @@ export default function ComplaintsTable({
                           {format(new Date(complaint.submittedDate), "PPp")}
                         </span>
                         {/* Show department for assigned complaints in collector view */}
-                        {complaint.status === "Assigned" &&
-                          complaint.department &&
-                          role === "District Collector" && (
+                        {complaint.department &&
+                          (role === "District Collector" ||
+                            role === "Collector Team" ||
+                            role === "Collector Team Advanced") && (
                             <>
                               <span className="text-gray-300 dark:text-gray-700">
                                 •

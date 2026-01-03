@@ -153,6 +153,10 @@ function getDepartmentName(department: Department | null): string {
     DEPUTY_COLLECTOR_GENERAL_GONDIA: "Deputy Collector General Gondia",
     PO_OFFICE_DEORI: "PO Office Deori",
     ST_DEPO_OFFICE_GONDIA: "ST Depo Office Gondia",
+    NAGAR_PANCHAYAT_SALEKASA: "Nagar Panchayat Salekasa",
+    NAGAR_PANCHAYAT_DEORI: "Nagar Panchayat Deori",
+    NAGAR_PANCHAYAT_ARJUNI_MOR: "Nagar Panchayat Arjuni Mor",
+    NAGAR_PANCHAYAT_SADAK_ARJUNI: "Nagar Panchayat Sadak Arjuni",
   };
   return deptMap[department] || "";
 }
@@ -193,6 +197,10 @@ function getDepartmentRoleFromDepartment(department: Department | null): Role {
     DEPUTY_COLLECTOR_GENERAL_GONDIA: "DEPUTY_COLLECTOR_GENERAL_GONDIA",
     PO_OFFICE_DEORI: "PO_OFFICE_DEORI",
     ST_DEPO_OFFICE_GONDIA: "ST_DEPO_OFFICE_GONDIA",
+    NAGAR_PANCHAYAT_SALEKASA: "NAGAR_PANCHAYAT_SALEKASA",
+    NAGAR_PANCHAYAT_DEORI: "NAGAR_PANCHAYAT_DEORI",
+    NAGAR_PANCHAYAT_ARJUNI_MOR: "NAGAR_PANCHAYAT_ARJUNI_MOR",
+    NAGAR_PANCHAYAT_SADAK_ARJUNI: "NAGAR_PANCHAYAT_SADAK_ARJUNI",
   };
 
   return deptToRoleMap[department] || "DEPARTMENT_TEAM";

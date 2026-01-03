@@ -71,6 +71,10 @@ export const departments = [
   "Deputy Collector General Gondia",
   "PO Office Deori",
   "ST Depo Office Gondia",
+  "Nagar Panchayat Salekasa",
+  "Nagar Panchayat Deori",
+  "Nagar Panchayat Arjuni Mor",
+  "Nagar Panchayat Sadak Arjuni",
 ] as const;
 export type Department = (typeof departments)[number];
 
