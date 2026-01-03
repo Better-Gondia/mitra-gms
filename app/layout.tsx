@@ -32,6 +32,8 @@ import {
   Camera,
   Bug,
   Trash2,
+  Database,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -755,6 +757,69 @@ function FeedbackDialog({
   );
 }
 
+function SeedButton() {
+  const { data: session } = useSession();
+  const [isSeeding, setIsSeeding] = useState(false);
+
+  const handleSeed = async () => {
+    if (isSeeding) return;
+
+    // Confirm before seeding
+    const confirmed = window.confirm(
+      "Are you sure you want to seed the database? This will add mock data."
+    );
+    if (!confirmed) return;
+
+    setIsSeeding(true);
+    try {
+      const response = await fetch("/api/seed", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clearExisting: false,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || "Database seeded successfully!");
+        // Reload the page after a short delay to show new data
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        toast.error(data.error || "Failed to seed database");
+      }
+    } catch (error: any) {
+      console.error("Error seeding database:", error);
+      toast.error(error.message || "Failed to seed database");
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-9 w-9"
+      onClick={handleSeed}
+      disabled={isSeeding}
+      title="Seed Database"
+    >
+      {isSeeding ? (
+        <Loader2 className="h-5 w-5 animate-spin" />
+      ) : (
+        <Database className="h-5 w-5" />
+      )}
+      <span className="sr-only">Seed Database</span>
+    </Button>
+  );
+}
+
 function AppLayoutContent({
   children,
 }: Readonly<{
@@ -816,6 +881,7 @@ function AppLayoutContent({
                 <MessageSquarePlus className="h-5 w-5" />
                 <span className="sr-only">Provide Feedback</span>
               </Button>
+              {/* <SeedButton /> */}
               <NotificationMenu />
             </>
           )}
